@@ -1,3 +1,7 @@
+import 'package:elmasroof/shared/formatter/custom_pattern_formatter.dart';
+import 'package:elmasroof/shared/formatter/formatter.dart';
+import 'package:elmasroof/shared/formatter/general_formatter.dart';
+import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,15 +13,16 @@ Widget createTextField(
       double titleSize = 15.0,
       Color titleColor = Colors.black87,
       String hint = '',
-      String text = '',
       double textSize = 15.0,
+      TextAlign alignment = TextAlign.end,
       double? width,
       double? height,
       double? paddingHorizontal,
-      Color backgroundColor = Colors.white70,
+      Color backgroundColor = Colors.black12,
       Color? color,
       TextInputAction action = TextInputAction.done,
       TextInputType inputType = TextInputType.text,
+      Formatter? formatter,
       FocusNode? node,
       Function? validator,
       Function? submit,
@@ -64,7 +69,7 @@ Widget createTextField(
               textInputAction: action,
               keyboardType: inputType,
               maxLines: 1,
-              textAlign: TextAlign.end,
+              textAlign: alignment,
               readOnly: !enable,
               decoration: InputDecoration(
                 hintText: hint,
@@ -98,12 +103,12 @@ Widget createTextField(
               ),
               inputFormatters: [
                 if(inputType == TextInputType.number)
-                  FilteringTextInputFormatter.allow(RegExp("[0-9]")),
+                  CustomPatternInputFormatter(formatter??GeneralFormatter()),
 
               ],
               style: TextStyle(
-                  fontSize: textSize,
-                  color: color
+                fontSize: textSize,
+                color: color,
               ),
               obscureText: hideText,
               validator: (val){
@@ -136,7 +141,7 @@ Widget createTitle({
   bool bold = true,
 }){
   return Padding(
-    padding: EdgeInsets.only(top: 8.0, bottom: 8.0, right: 20.0),
+    padding: EdgeInsets.only(top: 8.0, bottom: 8.0, ),
     child: Text(
       title,
       style: TextStyle(
@@ -145,6 +150,34 @@ Widget createTitle({
         fontWeight: bold?FontWeight.bold:null,
       ),
       textDirection: TextDirection.rtl,
+    ),
+  );
+}
+
+Widget createButton({
+  required String text,
+  required Function onPressed,
+  IconData? icon,
+}){
+  return TextButton(
+    onPressed: () => onPressed(),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.lightBlue,
+        borderRadius: BorderRadius.circular(30.0),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if(icon != null)
+            Icon(icon, color: Colors.white,),
+          if(icon != null)
+            SizedBox(width: 10,),
+          Text(text, style: TextStyle(color: Colors.white, fontSize: 20.0),),
+        ],
+      ),
     ),
   );
 }

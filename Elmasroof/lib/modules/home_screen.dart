@@ -1,32 +1,33 @@
+import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
+import 'package:elmasroof/cubit/home_cubit/home_states.dart';
 import 'package:elmasroof/layouts/alerts/add_child_alert.dart';
+import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/modules/settings_screen.dart';
+import 'package:elmasroof/shared/components/components.dart';
+import 'package:elmasroof/shared/formatter/positive_formatter.dart';
+import 'package:elmasroof/shared/network/local/hive_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key, required this.hiveStorage});
+
+  HiveStorage hiveStorage;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  late Box<dynamic> _box;
-  List<dynamic> _childrenNames = [];
-  TextEditingController _expensesChangeController = TextEditingController();
+  TextEditingController _expensesChangeController = TextEditingController()
+    ..text = '0';
+  GlobalKey<FormFieldState> _expensesChangeKey = GlobalKey();
+  late HomeCubit _cubit;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    Hive.openBox('Elmasroof').then((box) {
-      setState(() {
-        _box = box;
-        _childrenNames.addAll(_box.toMap().keys);
-      });
-    });
-    _expensesChangeController.text = '0';
   }
 
   @override
@@ -38,7 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (BuildContext context) => const SettingsScreen()),
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const SettingsScreen()),
             ),
             icon: const Icon(Icons.settings),
           ),
@@ -47,68 +49,162 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: (){
-                showAddChildAlert(context: context);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue,
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
-                child: const Row(
+        child: BlocProvider(
+          create: (context) => HomeCubit(widget.hiveStorage),
+          child: BlocConsumer<HomeCubit, HomeStates>(
+              listener: (context, state) {},
+              builder: (context, state) {
+                _cubit = HomeCubit.get(context);
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Icons.add, color: Colors.white,),
-                    SizedBox(width: 3,),
-                    Text('اضافة ابن/بنت', style: TextStyle(color: Colors.white),),
-                  ],
-                ),
-              ),
-            ),
-            if(_childrenNames.isNotEmpty)
-              Column(
-                children: [
-                  const SizedBox(height: 25,),
-                  DropdownMenu(
-                    dropdownMenuEntries: List.generate(_childrenNames.length,
-                          (index) => DropdownMenuEntry(
-                              value: _childrenNames[index], label: _childrenNames[index]
-                          )
+                    createButton(
+                      text: 'إضافة إبن/بنت',
+                      onPressed: () =>
+                          showAddChildAlert(context: context, cubit: _cubit),
+                      icon: Icons.add,
                     ),
-                  ),
-                  const SizedBox(height: 5,),
-                  Text(_box.get(_childrenNames[0])!),
-                  const SizedBox(height: 15,),
-                  Row(
-                    children: [
-                      IconButton(onPressed: (){}, icon: const Icon(Icons.remove),),
-                      const SizedBox(width: 5,),
-                      TextFormField(
-                        controller: _expensesChangeController,
+                    if (_cubit.childrenNames.isNotEmpty)
+                      Column(
+                        children: [
+                          const SizedBox(
+                            height: 25,
+                          ),
+                          DropdownMenu(
+                            dropdownMenuEntries: List.generate(
+                              _cubit.childrenNames.length,
+                              (index) => DropdownMenuEntry(
+                                  value: index,
+                                  label: _cubit.childrenNames[index],
+                              ),
+                            ),
+                            initialSelection: _cubit.selectedIndex,
+                            onSelected: (index) {
+                              _cubit.changeChild(index!);
+                            },
+                            controller: TextEditingController()..text = _cubit.childrenNames[_cubit.selectedIndex],
+                            menuStyle: MenuStyle(
+                              backgroundColor:
+                                  WidgetStatePropertyAll(Colors.white),
+                            ),
+                            inputDecorationTheme: InputDecorationTheme(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                          const SizedBox(height: 5,),
+                          createTitle(title: 'المبلغ الحالى:', titleSize: 18, ),
+                          Container(
+                            width: 200,
+                            height: 35,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.grey,
+                            ),
+                            child: Text(
+                              (widget.hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex]) ?? 0.0).toString(),
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              IconButton(
+                                padding: EdgeInsets.all(4),
+                                onPressed: () {
+                                  if(_expensesChangeKey.currentState!.validate()) {
+                                    double value = double.parse(_expensesChangeController.text);
+                                    _expensesChangeController.text = '0';
+                                    _cubit.addToName(-value);
+                                  }
+                                },
+                                icon: CircleAvatar(
+                                  backgroundColor: Colors.lightBlue,
+                                  child: const Icon(
+                                    Icons.remove,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              createTextField(
+                                width: 100,
+                                controller: _expensesChangeController,
+                                formKey: _expensesChangeKey,
+                                alignment: TextAlign.center,
+                                inputType: TextInputType.number,
+                                formatter: PositiveFormatter(),
+                                validator: (String value){
+                                  if(value.isEmpty){
+                                    return 'أدخل الرقم أولاً';
+                                  }
+                                  if(!PositiveFormatter().patternFormatter().hasMatch(value)) {
+                                    return 'أدخل رقم صحيح';
+                                  }
+                                  return null;
+                                }
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              IconButton(
+                                padding: EdgeInsets.all(4),
+                                onPressed: () {
+                                  if(_expensesChangeKey.currentState!.validate()) {
+                                    double value = double.parse(_expensesChangeController.text);
+                                    _expensesChangeController.text = '0';
+                                    _cubit.addToName(value);
+                                  }
+                                },
+                                icon: CircleAvatar(
+                                  backgroundColor: Colors.lightBlue,
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          createButton(
+                            text: 'تاريخ المعاملات',
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => HistoryScreen(),
+                              ),
+                            ),
+                            icon: Icons.date_range,
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          createButton(
+                            text: 'حذف',
+                            onPressed: () {
+                              _cubit.removeChild();
+                            },
+                            icon: Icons.delete_outline,
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 5,),
-                      IconButton(onPressed: (){}, icon: const Icon(Icons.add),),
-                    ],
-                  ),
-                  const SizedBox(height: 15,),
-                  TextButton(onPressed: (){}, child: Text('تاريخ المعاملات')),
-                  const SizedBox(height: 5,),
-                  TextButton(onPressed: (){}, child: Row(
-                    children: [
-                      Icon(Icons.delete_outline),
-                      Text('حذف'),
-                    ],
-                  )),
-                ],
-              ),
-          ],
+                  ],
+                );
+              }),
         ),
       ),
     );

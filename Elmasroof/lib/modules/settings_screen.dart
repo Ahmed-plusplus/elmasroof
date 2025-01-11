@@ -12,7 +12,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('El masroof'),
+        title: const Text('El masroof'),
         elevation: 5,
       ),
       body: Container(),

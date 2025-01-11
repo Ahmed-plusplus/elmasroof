@@ -4,12 +4,13 @@ class HiveStorage {
 
   static const ELMASROOF = 'Elmasroof';
 
-  late Box _box;
+  static late Box _box;
 
-  HiveStorage({
-    required String name,
-  }) {
-    _box = Hive.openBox(name) as Box;
+  HiveStorage._();
+
+  static Future<HiveStorage> getInstance() async {
+    _box = await Hive.openBox(ELMASROOF);
+    return HiveStorage._();
   }
 
   List getKeys() => _box.toMap().keys.toList();
@@ -17,5 +18,9 @@ class HiveStorage {
   void add(dynamic key, dynamic value) => _box.put(key, value);
 
   dynamic get(dynamic key) => _box.get(key);
+
+  dynamic getAt(int index) => _box.getAt(index);
+
+  void remove(dynamic key) => _box.delete(key);
 
 }
