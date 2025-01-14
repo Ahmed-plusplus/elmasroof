@@ -5,30 +5,25 @@ import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/modules/settings_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
-import 'package:elmasroof/shared/network/local/hive_storage.dart';
+import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
+import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key, required this.hiveStorage});
+  const HomeScreen({super.key, });
 
-  HiveStorage hiveStorage;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  TextEditingController _expensesChangeController = TextEditingController()
+  final TextEditingController _expensesChangeController = TextEditingController()
     ..text = '0';
-  GlobalKey<FormFieldState> _expensesChangeKey = GlobalKey();
+  final GlobalKey<FormFieldState> _expensesChangeKey = GlobalKey();
+  late HiveStorage hiveStorage = HiveStorage();
   late HomeCubit _cubit;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(8.0),
         child: BlocProvider(
-          create: (context) => HomeCubit(widget.hiveStorage),
+          create: (context) => HomeCubit(hiveStorage),
           child: BlocConsumer<HomeCubit, HomeStates>(
               listener: (context, state) {},
               builder: (context, state) {
@@ -84,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               _cubit.changeChild(index!);
                             },
                             controller: TextEditingController()..text = _cubit.childrenNames[_cubit.selectedIndex],
-                            menuStyle: MenuStyle(
+                            menuStyle: const MenuStyle(
                               backgroundColor:
                                   WidgetStatePropertyAll(Colors.white),
                             ),
@@ -106,8 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.grey,
                             ),
                             child: Text(
-                              (widget.hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex]) ?? 0.0).toString(),
-                              style: TextStyle(
+                              (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex]) ?? 0.0).toString(),
+                              style: const TextStyle(
                                 fontSize: 18,
                               ),
                             ),
@@ -120,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               IconButton(
-                                padding: EdgeInsets.all(4),
+                                padding: const EdgeInsets.all(4),
                                 onPressed: () {
                                   if(_expensesChangeKey.currentState!.validate()) {
                                     double value = double.parse(_expensesChangeController.text);
@@ -128,9 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _cubit.addToName(-value);
                                   }
                                 },
-                                icon: CircleAvatar(
+                                icon: const CircleAvatar(
                                   backgroundColor: Colors.lightBlue,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.remove,
                                     color: Colors.white,
                                   ),
@@ -160,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 width: 5,
                               ),
                               IconButton(
-                                padding: EdgeInsets.all(4),
+                                padding: const EdgeInsets.all(4),
                                 onPressed: () {
                                   if(_expensesChangeKey.currentState!.validate()) {
                                     double value = double.parse(_expensesChangeController.text);
@@ -168,9 +163,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _cubit.addToName(value);
                                   }
                                 },
-                                icon: CircleAvatar(
+                                icon: const CircleAvatar(
                                   backgroundColor: Colors.lightBlue,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.add,
                                     color: Colors.white,
                                   ),
@@ -183,11 +178,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           createButton(
                             text: 'تاريخ المعاملات',
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => HistoryScreen(),
-                              ),
-                            ),
+                            onPressed: () {
+                              String name = _cubit.childrenNames[_cubit.selectedIndex];
+                              SqfliteDB().getChildTransactions(name)
+                                  .then((list) => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => HistoryScreen(
+                                        name: name,
+                                        transactionList: list,
+                                      ),
+                                    )
+                                ).catchError((e) => print(e.toString()))
+                              );
+                            },
                             icon: Icons.date_range,
                           ),
                           const SizedBox(

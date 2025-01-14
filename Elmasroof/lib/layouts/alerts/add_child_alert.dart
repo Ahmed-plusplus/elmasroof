@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:ui';
 
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
@@ -23,7 +22,7 @@ void showAddChildAlert({
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         alignment: Alignment.center,
-        insetPadding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
           child: Padding(
@@ -45,6 +44,11 @@ void showAddChildAlert({
                       return 'أدخل الإسم أولاً';
                     }
                     return null;
+                  },
+                  submit: (String value){
+                    if(nameKey.currentState!.validate()) {
+                      FocusScope.of(context).requestFocus(initExpensesNode);
+                    }
                   }
                 ),
                 createTextField(

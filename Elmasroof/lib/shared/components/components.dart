@@ -1,9 +1,7 @@
 import 'package:elmasroof/shared/formatter/custom_pattern_formatter.dart';
 import 'package:elmasroof/shared/formatter/formatter.dart';
 import 'package:elmasroof/shared/formatter/general_formatter.dart';
-import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 Widget createTextField(
     {
@@ -35,6 +33,7 @@ Widget createTextField(
       Function? onSuffix,
       bool hideText = false,
       bool enable = true,
+      bool expand = false,
     }
     ){
   return Padding(
@@ -48,7 +47,7 @@ Widget createTextField(
             titleSize: titleSize,
             color: titleColor,
           ),
-        Container(
+        SizedBox(
           height: height ?? 70.0,
           width: width ?? 300.0,
           child: Focus(
@@ -68,7 +67,8 @@ Widget createTextField(
               focusNode: node,
               textInputAction: action,
               keyboardType: inputType,
-              maxLines: 1,
+              maxLines: expand ? null : 1,
+              expands: expand,
               textAlign: alignment,
               readOnly: !enable,
               decoration: InputDecoration(
@@ -79,9 +79,9 @@ Widget createTextField(
                 ),
                 fillColor: backgroundColor,
                 filled: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10.0),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(50.0),
+                  borderRadius: BorderRadius.circular(expand ? 20.0 : 50.0),
                   borderSide: BorderSide.none,
                 ),
                 errorBorder: OutlineInputBorder(
@@ -141,7 +141,7 @@ Widget createTitle({
   bool bold = true,
 }){
   return Padding(
-    padding: EdgeInsets.only(top: 8.0, bottom: 8.0, ),
+    padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, ),
     child: Text(
       title,
       style: TextStyle(
@@ -166,7 +166,7 @@ Widget createButton({
         color: Colors.lightBlue,
         borderRadius: BorderRadius.circular(30.0),
       ),
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -174,8 +174,8 @@ Widget createButton({
           if(icon != null)
             Icon(icon, color: Colors.white,),
           if(icon != null)
-            SizedBox(width: 10,),
-          Text(text, style: TextStyle(color: Colors.white, fontSize: 20.0),),
+            const SizedBox(width: 10,),
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 20.0),),
         ],
       ),
     ),

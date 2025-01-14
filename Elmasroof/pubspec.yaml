@@ -39,7 +39,10 @@ dependencies:
   sqflite: ^2.4.1
   bloc: ^8.1.4
   flutter_bloc: ^8.1.5
+  workmanager: ^0.5.2
+  shared_preferences: ^2.3.5
 
+  path: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

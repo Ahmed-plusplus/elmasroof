@@ -1,4 +1,6 @@
-import 'package:elmasroof/shared/network/local/hive_storage.dart';
+import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
+import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'home_states.dart';
 
@@ -13,9 +15,10 @@ class HomeCubit extends Cubit<HomeStates> {
   HiveStorage hiveStorage;
   List<dynamic> childrenNames = [];
   int selectedIndex = 0;
+  SqfliteDB db = SqfliteDB();
 
   void addChild(String name, double value){
-    hiveStorage.add(name, value);
+    hiveStorage.put(name, value);
     childrenNames.add(name);
     selectedIndex = childrenNames.length - 1;
     emit(AddChildState());
@@ -29,12 +32,20 @@ class HomeCubit extends Cubit<HomeStates> {
   void addToName(double value){
     double currentValue = hiveStorage.get(childrenNames[selectedIndex]) ?? 0.0;
     currentValue += value;
-    hiveStorage.add(childrenNames[selectedIndex], currentValue);
+    hiveStorage.put(childrenNames[selectedIndex], currentValue);
+    db.insertChildData(
+      ChildModel(
+        name: childrenNames[selectedIndex],
+        expenses: value,
+        total: currentValue,
+      ),
+    );
     emit(AddToNameState());
   }
 
   void removeChild(){
     hiveStorage.remove(childrenNames[selectedIndex]);
+    db.removeChild(childrenNames[selectedIndex]);
     childrenNames.removeAt(selectedIndex);
     selectedIndex = 0;
     emit(RemoveChildState());

@@ -6,16 +6,13 @@ class HiveStorage {
 
   static late Box _box;
 
-  HiveStorage._();
-
-  static Future<HiveStorage> getInstance() async {
+  static Future<void> getInstance() async {
     _box = await Hive.openBox(ELMASROOF);
-    return HiveStorage._();
   }
 
   List getKeys() => _box.toMap().keys.toList();
 
-  void add(dynamic key, dynamic value) => _box.put(key, value);
+  void put(dynamic key, dynamic value) => _box.put(key, value);
 
   dynamic get(dynamic key) => _box.get(key);
 
