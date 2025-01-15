@@ -1,3 +1,5 @@
+import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
+import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/modules/home_screen.dart';
 import 'package:elmasroof/shared/bloc_observer.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
@@ -30,13 +32,19 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Elmasroof',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => HomeCubit(HiveStorage()),),
+        BlocProvider(create: (context) => HistoryCubit(),),
+      ],
+      child: MaterialApp(
+        title: 'Elmasroof',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
 
+        ),
+        home: const HomeScreen(),
       ),
-      home: const HomeScreen(),
     );
   }
 }

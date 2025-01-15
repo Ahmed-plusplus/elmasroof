@@ -59,6 +59,14 @@ void showAddChildAlert({
                   node: initExpensesNode,
                   inputType: TextInputType.number,
                   formatter: DecimalFormatter(),
+                  submit: (value) => _submit(
+                    nameKey: nameKey,
+                    initExpensesKey: initExpensesKey,
+                    initExpensesController: initExpensesController,
+                    nameController: nameController,
+                    cubit: cubit,
+                    context: context,
+                  ),
                   prefixIcon: Icons.currency_pound,
                     validator: (String value){
                       if(value.isEmpty) {
@@ -72,13 +80,14 @@ void showAddChildAlert({
                 ),
                 createButton(
                   text: 'إضافة',
-                  onPressed: () {
-                    if(nameKey.currentState!.validate() && initExpensesKey.currentState!.validate()) {
-                      double value = double.parse(initExpensesController.text);
-                      cubit.addChild(nameController.text, value);
-                      Navigator.of(context).pop();
-                    }
-                  },
+                  onPressed: () => _submit(
+                      nameKey: nameKey,
+                      initExpensesKey: initExpensesKey,
+                      initExpensesController: initExpensesController,
+                      nameController: nameController,
+                      cubit: cubit,
+                      context: context,
+                    ),
                   icon: Icons.add,
                 ),
               ],
@@ -90,4 +99,19 @@ void showAddChildAlert({
     barrierLabel: 'add child alert',
     barrierDismissible: true
   );
+}
+
+void _submit({
+  required GlobalKey<FormFieldState>nameKey,
+  required GlobalKey<FormFieldState>initExpensesKey,
+  required TextEditingController initExpensesController,
+  required TextEditingController nameController,
+  required HomeCubit cubit,
+  required BuildContext context,
+}){
+  if(nameKey.currentState!.validate() && initExpensesKey.currentState!.validate()) {
+    double value = double.parse(initExpensesController.text);
+    cubit.addChild(nameController.text, value);
+    Navigator.of(context).pop();
+  }
 }
