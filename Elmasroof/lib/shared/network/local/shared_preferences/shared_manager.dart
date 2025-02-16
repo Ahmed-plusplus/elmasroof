@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedManager {
   static late SharedPreferences _sharedPref;
 
+  static const String LOGIN_PASSWORD = 'loginPassword';
+
   static init() async {
     _sharedPref = await SharedPreferences.getInstance();
   }

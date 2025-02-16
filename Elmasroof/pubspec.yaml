@@ -41,6 +41,7 @@ dependencies:
   flutter_bloc: ^8.1.5
   workmanager: ^0.5.2
   shared_preferences: ^2.3.5
+  local_auth: ^2.3.0
 
   path: any
 dev_dependencies:
