@@ -1,3 +1,4 @@
+import 'package:elmasroof/modules/settings_screen.dart';
 import 'package:elmasroof/shared/formatter/custom_pattern_formatter.dart';
 import 'package:elmasroof/shared/formatter/formatter.dart';
 import 'package:elmasroof/shared/formatter/general_formatter.dart';
@@ -23,6 +24,7 @@ Widget createTextField(
       Formatter? formatter,
       FocusNode? node,
       Function? validator,
+      Function? onChanged,
       Function? submit,
       Function? preValidate,
       IconData? prefixIcon,
@@ -126,6 +128,11 @@ Widget createTextField(
                   await submit(val);
                 }
               },
+              onChanged: (val) async{
+                if(onChanged != null){
+                  await onChanged(val);
+                }
+              },
             ),
           ),
         ),
@@ -181,3 +188,17 @@ Widget createButton({
     ),
   );
 }
+
+AppBar appBarWidget({BuildContext? context}) => AppBar(
+  title: const Text('El masroof'),
+  elevation: 5,
+  actions: (context == null)?[]:[
+    IconButton(
+      onPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (BuildContext context) => const SettingsScreen()),
+      ),
+      icon: const Icon(Icons.settings),
+    ),
+  ],
+);

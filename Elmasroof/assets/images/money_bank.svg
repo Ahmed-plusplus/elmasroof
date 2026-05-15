@@ -1,0 +1,35 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Main Body -->
+  <rect x="120" y="90" width="160" height="205" rx="18" fill="#EF4444"/>
+
+  <!-- Top Rim -->
+  <ellipse cx="200" cy="90" rx="80" ry="18" fill="#B91C1C"/>
+
+  <!-- Coin Slot Centered -->
+  <rect x="165" y="84" width="70" height="8" rx="4" fill="#450A0A"/>
+
+  <!-- Center Coin -->
+  <circle cx="200" cy="190" r="48" fill="#FACC15"/>
+  <circle cx="200" cy="190" r="38" fill="#FBBF24"/>
+
+  <!-- Dollar Symbol -->
+  <text x="200" y="204"
+        text-anchor="middle"
+        font-size="42"
+        font-family="Arial"
+        font-weight="bold"
+        fill="#92400E">$</text>
+
+  <!-- Decorative Lines -->
+  <line x1="145" y1="250" x2="255" y2="250"
+        stroke="#FCA5A5"
+        stroke-width="6"
+        stroke-linecap="round"/>
+
+  <line x1="160" y1="265" x2="240" y2="265"
+        stroke="#FCA5A5"
+        stroke-width="6"
+        stroke-linecap="round"/>
+
+</svg>

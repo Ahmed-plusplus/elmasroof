@@ -1,3 +1,4 @@
+import 'package:elmasroof/shared/components/components.dart';
 import 'package:flutter/material.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
@@ -11,10 +12,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('El masroof'),
-        elevation: 5,
-      ),
+      appBar: appBarWidget(),
       body: Container(),
     );
   }

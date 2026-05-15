@@ -26,10 +26,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('El masroof'),
-        elevation: 5,
-      ),
+      appBar: appBarWidget(),
       body: Column(
         children: [
           createTitle(title: 'الإسم: ${widget.name}'),
@@ -41,7 +38,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               border: Border.all(),
               borderRadius: BorderRadius.circular(5),
             ),
-            child: Row(
+            child: const Row(
               children: [
                 SizedBox(width: 50,),
                 Expanded(
@@ -52,7 +49,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                 ),
-                const Spacer(),
+                Spacer(),
                 Expanded(
                   child: Text(
                     'القيمة المتغيرة',
@@ -145,7 +142,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         widget.transactionList[index].description,
                                         textAlign: TextAlign.end,
                                       ),
-                                      Text(
+                                      const Text(
                                         'التفاصيل: ',
                                         textAlign: TextAlign.start,
                                         textDirection: TextDirection.rtl,
