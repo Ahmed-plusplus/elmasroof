@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 enum ParentType {
-  FATHER('أب', Icons.man),
-  MOTHER('أم', Icons.woman);
+  FATHER('أب', Icons.face),
+  MOTHER('أم', Icons.face_3);
 
   final String type;
   final IconData icon;

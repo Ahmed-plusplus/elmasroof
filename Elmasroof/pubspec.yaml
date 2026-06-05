@@ -45,6 +45,7 @@ dependencies:
   flutter_launcher_icons: "^0.14.4"
   lottie: ^3.1.2
   flutter_svg: ^2.1.0
+  carousel_slider: ^5.1.2
 
   path: any
 dev_dependencies:

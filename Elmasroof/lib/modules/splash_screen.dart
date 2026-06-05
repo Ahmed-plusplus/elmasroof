@@ -39,7 +39,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: Lottie.asset('assets/jsons/fake_3d_vector_coin.json')),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset('assets/jsons/fake_3d_vector_coin.json'),
+          const SizedBox(height: 20,),
+          const Text('Elmasroof', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+          const SizedBox(height: 10,),
+          const Text('Manage your children\'s expenses', style: TextStyle(fontSize: 20, color: Colors.grey),)
+        ],
+      ),
     );
   }
 

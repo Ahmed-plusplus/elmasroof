@@ -22,6 +22,7 @@ abstract class ElmasroofRadioGroup<T> extends StatefulWidget {
         child: BlocConsumer<RadioGroupCubit, RadioGroupStates>(
             listener: (context, state){},
             builder: (context, state) {
+              _cubit = BlocProvider.of<RadioGroupCubit>(context);
               return createRadioGroup(_cubit);
             }
         )
