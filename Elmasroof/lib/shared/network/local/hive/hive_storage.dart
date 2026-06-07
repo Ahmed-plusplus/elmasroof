@@ -1,22 +1,24 @@
+import 'package:elmasroof/models/child_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveStorage {
 
   static const ELMASROOF = 'Elmasroof';
 
-  static late Box _box;
+  static late Box<ChildModel> _box;
 
   static Future<void> getInstance() async {
-    _box = await Hive.openBox(ELMASROOF);
+    Hive.registerAdapter(ChildModelAdapter());
+    _box = await Hive.openBox<ChildModel>(ELMASROOF);
   }
 
   List getKeys() => _box.toMap().keys.toList();
 
-  void put(dynamic key, dynamic value) => _box.put(key, value);
+  void put(dynamic key, ChildModel value) => _box.put(key, value);
 
-  dynamic get(dynamic key) => _box.get(key);
+  ChildModel? get(dynamic key) => _box.get(key);
 
-  dynamic getAt(int index) => _box.getAt(index);
+  ChildModel? getAt(int index) => _box.getAt(index);
 
   void remove(dynamic key) => _box.delete(key);
 

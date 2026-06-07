@@ -1,4 +1,4 @@
-import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/network/local/sqflite/transaction_constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -45,7 +45,7 @@ class SqfliteDB {
     return await _database.rawQuery(query, args);
   }
 
-  void insertChildData(ChildModel child) {
+  void insertChildData(ChildExpensesChangingModel child) {
     _database.transaction((txn) {
       return txn
           .rawInsert('INSERT INTO ${TransactionConstants.TRANSACTION_TABLE} ('
@@ -66,14 +66,14 @@ class SqfliteDB {
     });
   }
 
-  Future<List<ChildModel>> getChildTransactions(String name) async {
+  Future<List<ChildExpensesChangingModel>> getChildTransactions(String name) async {
     List<Map<String, dynamic>> list = await getData(
         'SELECT * FROM "${TransactionConstants.TRANSACTION_TABLE}" WHERE ${TransactionConstants.NAME_ATTR} = ?',
         [name],
     );
     return list.reversed
         .map(
-          (map) => ChildModel(
+          (map) => ChildExpensesChangingModel(
             id: map[TransactionConstants.ID_ATTR],
             name: map[TransactionConstants.NAME_ATTR],
             expenses: map[TransactionConstants.AMOUNT_ATTR],

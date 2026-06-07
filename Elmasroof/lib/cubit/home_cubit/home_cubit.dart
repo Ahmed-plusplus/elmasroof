@@ -1,4 +1,6 @@
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,13 +16,15 @@ class HomeCubit extends Cubit<HomeStates> {
 
   HiveStorage hiveStorage;
   List<dynamic> childrenNames = [];
+  String stickerPath = ConstAssetImages.face1.path;
   int selectedIndex = 0;
   SqfliteDB db = SqfliteDB();
 
-  void addChild(String name, double value){
+  void addChild(String name, ChildModel value){
     hiveStorage.put(name, value);
     childrenNames.add(name);
     selectedIndex = childrenNames.length - 1;
+    stickerPath = ConstAssetImages.face1.path;
     emit(AddChildState());
   }
 
@@ -30,14 +34,14 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   void addToName(double value){
-    double currentValue = hiveStorage.get(childrenNames[selectedIndex]) ?? 0.0;
-    currentValue += value;
-    hiveStorage.put(childrenNames[selectedIndex], currentValue);
+    var child = hiveStorage.get(childrenNames[selectedIndex])!;
+    child.expenses += value;
+    hiveStorage.put(childrenNames[selectedIndex], child);
     db.insertChildData(
-      ChildModel(
+      ChildExpensesChangingModel(
         name: childrenNames[selectedIndex],
         expenses: value,
-        total: currentValue,
+        total: child.expenses,
       ),
     );
     emit(AddToNameState());
@@ -49,6 +53,18 @@ class HomeCubit extends Cubit<HomeStates> {
     childrenNames.removeAt(selectedIndex);
     selectedIndex = 0;
     emit(RemoveChildState());
+  }
+
+  void changeSticker(int index) {
+    stickerPath = ConstAssetImages.faces[index].path;
+    emit(ChangeStickerState());
+  }
+
+  void changeChildSticker(int index) {
+    var child = hiveStorage.get(childrenNames[selectedIndex])!;
+    child.stickerPath = ConstAssetImages.faces[index].path;
+    hiveStorage.put(childrenNames[selectedIndex], child);
+    emit(ChangeChildStickerState());
   }
 
 }

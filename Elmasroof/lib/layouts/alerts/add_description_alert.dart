@@ -1,14 +1,14 @@
 import 'dart:ui';
 
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
-import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:flutter/material.dart';
 
 void showAddDescriptionAlert({
   required BuildContext context,
   required HistoryCubit cubit,
-  required ChildModel child,
+  required ChildExpensesChangingModel child,
 }){
   TextEditingController descriptionController = TextEditingController();
   GlobalKey<FormFieldState> descriptionKey = GlobalKey();

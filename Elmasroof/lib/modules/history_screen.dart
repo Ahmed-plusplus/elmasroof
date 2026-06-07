@@ -1,7 +1,7 @@
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
 import 'package:elmasroof/cubit/history_cubit/history_states.dart';
 import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
-import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
@@ -12,7 +12,7 @@ class HistoryScreen extends StatefulWidget {
   HistoryScreen({super.key, required this.name, required this.transactionList,});
 
   String name;
-  List<ChildModel> transactionList;
+  List<ChildExpensesChangingModel> transactionList;
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();

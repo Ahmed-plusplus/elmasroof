@@ -1,19 +1,21 @@
-class ChildModel{
-  int? id;
-  String name;
+import 'package:hive/hive.dart';
+
+part 'child_model.g.dart';
+
+@HiveType(typeId: 1)
+class ChildModel {
+  @HiveField(0)
+  final String name;
+
+  @HiveField(1)
   double expenses;
-  DateTime? dateTime;
-  String description;
-  double total;
+
+  @HiveField(2)
+  String stickerPath;
 
   ChildModel({
-    this.id,
     required this.name,
     required this.expenses,
-    this.dateTime,
-    this.description = '',
-    required this.total,
-  }) {
-    dateTime ??= DateTime.now();
-  }
+    required this.stickerPath,
+  });
 }

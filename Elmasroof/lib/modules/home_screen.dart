@@ -2,6 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_states.dart';
 import 'package:elmasroof/layouts/alerts/add_child_alert.dart';
+import 'package:elmasroof/layouts/alerts/change_sticker_alert.dart';
+import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
@@ -263,10 +265,27 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     margin: EdgeInsets.all(24),
     child: Center(
-      child: Text(
-        name,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
-        textAlign: TextAlign.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if(!isAddCard)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GestureDetector(
+                onLongPress: () => showChangeStickerAlert(context: context, onChoose: (index) => _cubit.changeChildSticker(index)),
+                child: Container(
+                  decoration: ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.white, width: 2)), color: Colors.white12),
+                  padding: const EdgeInsets.all(16.0),
+                  child: SvgPicture.asset(_cubit.hiveStorage.get(name)!.stickerPath, fit: BoxFit.contain, width: 40, height: 40,),
+                ),
+              ),
+            ),
+          Text(
+            name,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     ),
   );
@@ -278,6 +297,15 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 20,),
+        const Text('أضف ملصقاً جديداً', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+        GestureDetector(
+          onTap: () => showChangeStickerAlert(context: context, onChoose: (index) => _cubit.changeSticker(index)),
+          child: Container(
+            decoration: ShapeDecoration(shape: CircleBorder(), color: Colors.grey.shade300),
+            padding: const EdgeInsets.all(20.0),
+            child: SvgPicture.asset(_cubit.stickerPath, fit: BoxFit.contain, width: 40, height: 40,),
+          ),
+        ),
         createTextField(
             title: 'إسم الإبن/البنت',
             hint: 'أدخل الإسم',
@@ -334,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }){
     if(nameKey.currentState!.validate() && initExpensesKey.currentState!.validate()) {
       double value = double.parse(initExpensesController.text);
-      _cubit.addChild(nameController.text, value);
+      _cubit.addChild(nameController.text, ChildModel(name: nameController.text, expenses: value, stickerPath: _cubit.stickerPath));
     }
   }
 
@@ -367,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     valueListenable: ListenOnValue.expensesNotifier,
                     builder: (context, value, child) {
                       return Text(
-                        (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex]) ?? 0.0).toString(),
+                        (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex])?.expenses ?? 0.0).toString(),
                         style: const TextStyle(
                           fontSize: 18,
                         ),

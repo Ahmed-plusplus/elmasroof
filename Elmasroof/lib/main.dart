@@ -63,8 +63,9 @@ void callbackDispatcher() async {
   HiveStorage hiveStorage = HiveStorage();
   var list = hiveStorage.getKeys();
   for(var el in list){
-    double x = hiveStorage.get(el);
-    hiveStorage.put(el, x+10);
+    var child = hiveStorage.get(el);
+    child!.expenses += 10;
+    hiveStorage.put(el, child);
   }
   ListenOnValue.expensesNotifier.value++;
   print('increase: ${DateTime.now()}');

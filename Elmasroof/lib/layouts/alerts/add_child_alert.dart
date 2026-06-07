@@ -111,7 +111,7 @@ void _submit({
 }){
   if(nameKey.currentState!.validate() && initExpensesKey.currentState!.validate()) {
     double value = double.parse(initExpensesController.text);
-    cubit.addChild(nameController.text, value);
+    // cubit.addChild(nameController.text, value);
     Navigator.of(context).pop();
   }
 }
