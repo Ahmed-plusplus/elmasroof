@@ -3,6 +3,7 @@ class TransactionConstants {
 
   static const String ID_ATTR = "id";
   static const String NAME_ATTR = "name";
+  static const String CURRENCY_ATTR = "currency";
   static const String AMOUNT_ATTR = "amount";
   static const String DATE_ATTR = "date";
   static const String DESCRIPTION_ATTR = "description";

@@ -18,7 +18,7 @@ class ChildModelAdapter extends TypeAdapter<ChildModel> {
     };
     return ChildModel(
       name: fields[0] as String,
-      expenses: fields[1] as double,
+      expenses: (fields[1] as Map).cast<Currency, double>(),
       stickerPath: fields[2] as String,
     );
   }

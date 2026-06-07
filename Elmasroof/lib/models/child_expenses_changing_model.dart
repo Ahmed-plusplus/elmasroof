@@ -1,10 +1,12 @@
+import 'package:elmasroof/shared/enum/currency.dart';
+
 class ChildExpensesChangingModel{
   int? id;
   String name;
-  double expenses;
+  (Currency, double) expenses;
   DateTime? dateTime;
   String description;
-  double total;
+  (Currency, double) total;
 
   ChildExpensesChangingModel({
     this.id,

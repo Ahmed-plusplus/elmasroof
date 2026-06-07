@@ -2,12 +2,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_states.dart';
 import 'package:elmasroof/layouts/alerts/add_child_alert.dart';
-import 'package:elmasroof/layouts/alerts/change_sticker_alert.dart';
+import 'package:elmasroof/layouts/alerts/choose_currency_alert.dart';
+import 'package:elmasroof/layouts/alerts/choose_sticker_alert.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
@@ -50,11 +52,11 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                childrenSlider(),
+                _childrenSlider(),
                 if(_cubit.selectedIndex == _cubit.childrenNames.length)
-                  addChildPage(context),
+                  _addChildPage(context),
                 if(_cubit.selectedIndex < _cubit.childrenNames.length)
-                  childPage(context),
+                  _childPage(context),
               ]
             );
           },
@@ -63,185 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget oldDesign() => Column(
-      children: (_cubit.childrenNames.isNotEmpty) ? [
-        createButton(
-          text: 'إضافة إبن/بنت',
-          onPressed: () =>
-              showAddChildAlert(context: context, cubit: _cubit),
-          icon: Icons.add,
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Image.asset(ConstAssetImages.saveMoney.path),
-        Stack(
-          alignment: AlignmentGeometry.center,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(24.0),
-              child: SvgPicture.asset(
-                ConstAssetImages.coinsBank.path,
-                fit: BoxFit.fill,
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 10,),
-                DropdownMenu(
-                  dropdownMenuEntries: List.generate(
-                    _cubit.childrenNames.length,
-                        (index) => DropdownMenuEntry(
-                      value: index,
-                      label: _cubit.childrenNames[index],
-                    ),
-                  ),
-                  initialSelection: _cubit.selectedIndex,
-                  onSelected: (index) {
-                    _cubit.changeChild(index!);
-                  },
-                  controller: TextEditingController()..text = _cubit.childrenNames[_cubit.selectedIndex],
-                  menuStyle: const MenuStyle(
-                    backgroundColor:
-                    WidgetStatePropertyAll(Colors.white),
-                  ),
-                  inputDecorationTheme: InputDecorationTheme(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
-                  textAlign: TextAlign.end,
-                ),
-                SizedBox(height: 70,),
-                createTitle(title: 'المبلغ الحالى', titleSize: 18, color: Colors.white),
-                Container(
-                  width: 140,
-                  height: 35,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Colors.grey,
-                  ),
-                  child: ValueListenableBuilder(
-                      valueListenable: ListenOnValue.expensesNotifier,
-                      builder: (context, value, child) {
-                        return Text(
-                          (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex]) ?? 0.0).toString(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                          ),
-                        );
-                      }
-                  ),
-                ),
-                const SizedBox(height: 30,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      padding: const EdgeInsets.all(4),
-                      onPressed: () {
-                        if(_expensesChangeKey.currentState!.validate()) {
-                          double value = double.parse(_expensesChangeController.text);
-                          _expensesChangeController.text = '0';
-                          _cubit.addToName(-value);
-                        }
-                      },
-                      icon: const CircleAvatar(
-                        backgroundColor: Colors.lightBlue,
-                        child: Icon(
-                          Icons.remove,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    createTextField(
-                        width: 80,
-                        paddingHorizontal: 0,
-                        backgroundColor: Colors.grey,
-                        controller: _expensesChangeController,
-                        formKey: _expensesChangeKey,
-                        alignment: TextAlign.center,
-                        inputType: TextInputType.number,
-                        formatter: PositiveFormatter(),
-                        validator: (String value){
-                          if(value.isEmpty){
-                            return 'أدخل الرقم أولاً';
-                          }
-                          if(!PositiveFormatter().patternFormatter().hasMatch(value)) {
-                            return 'أدخل رقم صحيح';
-                          }
-                          return null;
-                        }
-                    ),
-                    IconButton(
-                      padding: const EdgeInsets.all(4),
-                      onPressed: () {
-                        if(_expensesChangeKey.currentState!.validate()) {
-                          double value = double.parse(_expensesChangeController.text);
-                          _expensesChangeController.text = '0';
-                          _cubit.addToName(value);
-                        }
-                      },
-                      icon: const CircleAvatar(
-                        backgroundColor: Colors.lightBlue,
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20,),
-                createButton(
-                  text: 'تاريخ المعاملات',
-                  onPressed: () {
-                    String name = _cubit.childrenNames[_cubit.selectedIndex];
-                    SqfliteDB().getChildTransactions(name)
-                        .then((list) => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => HistoryScreen(
-                            name: name,
-                            transactionList: list,
-                          ),
-                        )
-                    ).catchError((e) => print(e.toString()))
-                    );
-                  },
-                  icon: Icons.date_range,
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        createButton(
-          text: 'حذف',
-          onPressed: () {
-            _cubit.removeChild();
-          },
-          icon: Icons.delete_outline,
-        ),
-      ] : [
-        Image.asset(ConstAssetImages.richChildren.path),
-        const SizedBox(
-          height: 25,
-        ),
-        createButton(
-          text: 'إضافة إبن/بنت',
-          onPressed: () =>
-              showAddChildAlert(context: context, cubit: _cubit),
-          icon: Icons.add,
-        ),
-      ],
-    );
-
-  Widget childrenSlider() => CarouselSlider(
+  Widget _childrenSlider() => CarouselSlider(
     options: CarouselOptions(
       height: 200.0,
       enableInfiniteScroll: false,
@@ -272,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: GestureDetector(
-                onLongPress: () => showChangeStickerAlert(context: context, onChoose: (index) => _cubit.changeChildSticker(index)),
+                onLongPress: () => showChooseStickerAlert(context: context, onChoose: (index) => _cubit.changeChildSticker(index)),
                 child: Container(
                   decoration: ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.white, width: 2)), color: Colors.white12),
                   padding: const EdgeInsets.all(16.0),
@@ -290,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 
-  Widget addChildPage(BuildContext context) => Padding(
+  Widget _addChildPage(BuildContext context) => Padding(
     padding: const EdgeInsets.all(8.0),
     child: Column(
       mainAxisSize: MainAxisSize.min,
@@ -299,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 20,),
         const Text('أضف ملصقاً جديداً', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
         GestureDetector(
-          onTap: () => showChangeStickerAlert(context: context, onChoose: (index) => _cubit.changeSticker(index)),
+          onTap: () => showChooseStickerAlert(context: context, onChoose: (index) => _cubit.changeSticker(index)),
           child: Container(
             decoration: ShapeDecoration(shape: CircleBorder(), color: Colors.grey.shade300),
             padding: const EdgeInsets.all(20.0),
@@ -335,7 +159,19 @@ class _HomeScreenState extends State<HomeScreen> {
             inputType: TextInputType.number,
             formatter: DecimalFormatter(),
             submit: (value) => _addChild(context: context),
-            prefixIcon: Icons.currency_pound,
+            prefixWidget: InkWell(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: CircleAvatar(
+                  child: SvgPicture.asset(_cubit.addChildCurrency.icon),
+                  backgroundColor: Colors.black12,
+                ),
+              ),
+              onTap: () => showChooseCurrencyAlert(
+                context: context,
+                onChoose: (currency) => _cubit.changeAddChildCurrency(currency),
+              ),
+            ),
             validator: (String value){
               if(value.isEmpty) {
                 return 'يجب إدخال المبلغ';
@@ -362,11 +198,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }){
     if(nameKey.currentState!.validate() && initExpensesKey.currentState!.validate()) {
       double value = double.parse(initExpensesController.text);
-      _cubit.addChild(nameController.text, ChildModel(name: nameController.text, expenses: value, stickerPath: _cubit.stickerPath));
+      _cubit.addChild(nameController.text, ChildModel(name: nameController.text, expenses: {_cubit.addChildCurrency: value}, stickerPath: _cubit.stickerPath));
     }
   }
 
-  Widget childPage(BuildContext context) => Column(
+  Widget _childPage(BuildContext context) => Column(
     children: [
       Stack(
         alignment: AlignmentGeometry.center,
@@ -391,16 +227,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(50),
                   color: Colors.grey,
                 ),
-                child: ValueListenableBuilder(
-                    valueListenable: ListenOnValue.expensesNotifier,
-                    builder: (context, value, child) {
-                      return Text(
-                        (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex])?.expenses ?? 0.0).toString(),
-                        style: const TextStyle(
-                          fontSize: 18,
-                        ),
-                      );
-                    }
+                child: Row(
+                  children: [
+                    InkWell(
+                      child: CircleAvatar(
+                        child: SvgPicture.asset(_cubit.childCurrency.icon),
+                        backgroundColor: Colors.black12,
+                      ),
+                      onTap: () => showChooseCurrencyAlert(
+                        context: context,
+                        onChoose: (currency) => _cubit.changeChildCurrency(currency),
+                      ),
+                    ),
+                    Spacer(),
+                    ValueListenableBuilder(
+                        valueListenable: ListenOnValue.expensesNotifier,
+                        builder: (context, value, child) {
+                          return Text(
+                            (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex])?.expenses[_cubit.childCurrency] ?? 0.0).toString(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                            ),
+                          );
+                        }
+                    ),
+                    Spacer(),
+                  ],
                 ),
               ),
               const SizedBox(height: 30,),
@@ -427,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                         double value = double.parse(_expensesChangeController.text);
                         _expensesChangeController.text = '0';
-                        _cubit.addToName(-value);
+                        _cubit.addToName(_cubit.childCurrency, -value);
                       }
                     },
                     icon: const CircleAvatar(
@@ -467,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                         double value = double.parse(_expensesChangeController.text);
                         _expensesChangeController.text = '0';
-                        _cubit.addToName(value);
+                        _cubit.addToName(_cubit.childCurrency, value);
                       }
                     },
                     icon: const CircleAvatar(

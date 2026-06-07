@@ -1,4 +1,5 @@
 import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveStorage {
@@ -9,6 +10,7 @@ class HiveStorage {
 
   static Future<void> getInstance() async {
     Hive.registerAdapter(ChildModelAdapter());
+    Hive.registerAdapter(CurrencyAdapter());
     _box = await Hive.openBox<ChildModel>(ELMASROOF);
   }
 

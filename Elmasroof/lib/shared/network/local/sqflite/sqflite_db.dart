@@ -1,4 +1,5 @@
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/network/local/sqflite/transaction_constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -9,7 +10,7 @@ class SqfliteDB {
 
   static Future<Database> createDB() async => _database = await openDatabase(
       join(await getDatabasesPath(), _DATABAS_NAME),
-      version: 2,
+      version: 3,
       onCreate: (database, version) async {
         try {
           await database.execute(_createOperationTable());
@@ -19,7 +20,7 @@ class SqfliteDB {
       },
       onOpen: (database) {},
       onUpgrade: (database, oldVersion, newVersion) async {
-        if(oldVersion <= 1){
+        if(oldVersion <= 2){
           try {
             await database.execute('DROP TABLE IF EXISTS ${TransactionConstants.TRANSACTION_TABLE}');
             await database.execute(_createOperationTable());
@@ -34,6 +35,7 @@ class SqfliteDB {
     return 'CREATE TABLE ${TransactionConstants.TRANSACTION_TABLE} ('
         '${TransactionConstants.ID_ATTR} INTEGER PRIMARY KEY AUTOINCREMENT,'
         '${TransactionConstants.NAME_ATTR} TEXT,'
+        '${TransactionConstants.CURRENCY_ATTR} TEXT,'
         '${TransactionConstants.AMOUNT_ATTR} REAL,'
         '${TransactionConstants.DATE_ATTR} INTEGER,'
         '${TransactionConstants.DESCRIPTION_ATTR} TEXT,'
@@ -50,16 +52,18 @@ class SqfliteDB {
       return txn
           .rawInsert('INSERT INTO ${TransactionConstants.TRANSACTION_TABLE} ('
               '${TransactionConstants.NAME_ATTR},'
+              '${TransactionConstants.CURRENCY_ATTR},'
               '${TransactionConstants.AMOUNT_ATTR},'
               '${TransactionConstants.DATE_ATTR},'
               '${TransactionConstants.DESCRIPTION_ATTR},'
               '${TransactionConstants.TOTAL_AMOUNT_ATTR}'
               ') VALUES ('
               '"${child.name}",'
-              '${child.expenses},'
+              '"${child.expenses.$1.name}",'
+              '${child.expenses.$2},'
               '${child.dateTime!.millisecondsSinceEpoch},'
               '"${child.description}",'
-              '${child.total}'
+              '${child.total.$2}'
               ')')
           .then((value) {})
           .catchError((error) => print(error.toString()));
@@ -76,10 +80,10 @@ class SqfliteDB {
           (map) => ChildExpensesChangingModel(
             id: map[TransactionConstants.ID_ATTR],
             name: map[TransactionConstants.NAME_ATTR],
-            expenses: map[TransactionConstants.AMOUNT_ATTR],
+            expenses: (Currency.values.where((currency) => currency.name == map[TransactionConstants.CURRENCY_ATTR]).first, map[TransactionConstants.AMOUNT_ATTR]),
             dateTime: DateTime.fromMillisecondsSinceEpoch(map[TransactionConstants.DATE_ATTR]),
             description: map[TransactionConstants.DESCRIPTION_ATTR],
-            total: map[TransactionConstants.TOTAL_AMOUNT_ATTR],
+            total: (Currency.values.where((currency) => currency.name == map[TransactionConstants.CURRENCY_ATTR]).first, map[TransactionConstants.TOTAL_AMOUNT_ATTR]),
           ),
         )
         .toList();

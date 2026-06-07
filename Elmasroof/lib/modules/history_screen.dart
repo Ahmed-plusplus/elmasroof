@@ -4,9 +4,11 @@ import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HistoryScreen extends StatefulWidget {
   HistoryScreen({super.key, required this.name, required this.transactionList,});
@@ -49,7 +51,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                 ),
-                Spacer(),
+                const SizedBox(width: 50,),
+                Expanded(
+                  child: Text(
+                    'نوع العملة',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5,),
                 Expanded(
                   child: Text(
                     'القيمة المتغيرة',
@@ -85,7 +97,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     String dateTime = widget.transactionList[index].dateTime!.toString();
                     String date = dateTime.substring(0, dateTime.indexOf(' '));
                     String time = dateTime.substring(dateTime.indexOf(' ') + 1, dateTime.indexOf('.'));
-                    double expenses = widget.transactionList[index].expenses;
+                    (Currency, double) expenses = widget.transactionList[index].expenses;
                     return InkWell(
                       child: GestureDetector(
                         onLongPress: () => widget.transactionList[index].description.isEmpty
@@ -108,21 +120,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   Text(date, style: const TextStyle(fontWeight: FontWeight.bold),),
                                   const SizedBox(width: 5,),
                                   Text(time, style: const TextStyle(fontSize: 12),),
-                                  const Spacer(),
+                                  const SizedBox(width: 35,),
+                                  SvgPicture.asset(expenses.$1.icon),
+                                  const SizedBox(width: 25,),
                                   Expanded(
                                     child: Text(
-                                      expenses >= 0 ? '+$expenses' : '$expenses',
+                                      expenses.$2 >= 0 ? '+${expenses.$2}' : '${expenses.$2}',
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: expenses >= 0 ? Colors.green : Colors.red,
+                                        color: expenses.$2 >= 0 ? Colors.green : Colors.red,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 7,),
                                   Expanded(
                                     child: Text(
-                                      '${widget.transactionList[index].total}',
+                                      '${widget.transactionList[index].total.$2}',
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,

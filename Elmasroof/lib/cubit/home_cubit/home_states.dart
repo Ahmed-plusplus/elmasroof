@@ -8,3 +8,5 @@ class AddToNameState extends HomeStates {}
 class RemoveChildState extends HomeStates {}
 class ChangeStickerState extends HomeStates {}
 class ChangeChildStickerState extends HomeStates {}
+class ChangeAddChildCurrencyState extends HomeStates {}
+class ChangeChildCurrencyState extends HomeStates {}

@@ -1,6 +1,7 @@
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,6 +19,8 @@ class HomeCubit extends Cubit<HomeStates> {
   List<dynamic> childrenNames = [];
   String stickerPath = ConstAssetImages.face1.path;
   int selectedIndex = 0;
+  Currency childCurrency = Currency.pound;
+  Currency addChildCurrency = Currency.pound;
   SqfliteDB db = SqfliteDB();
 
   void addChild(String name, ChildModel value){
@@ -25,6 +28,7 @@ class HomeCubit extends Cubit<HomeStates> {
     childrenNames.add(name);
     selectedIndex = childrenNames.length - 1;
     stickerPath = ConstAssetImages.face1.path;
+    addChildCurrency = Currency.pound;
     emit(AddChildState());
   }
 
@@ -33,15 +37,15 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(ChangeChildState());
   }
 
-  void addToName(double value){
+  void addToName(Currency currency, double value){
     var child = hiveStorage.get(childrenNames[selectedIndex])!;
-    child.expenses += value;
+    child.expenses[currency] = (child.expenses[currency] ?? 0) + value;
     hiveStorage.put(childrenNames[selectedIndex], child);
     db.insertChildData(
       ChildExpensesChangingModel(
         name: childrenNames[selectedIndex],
-        expenses: value,
-        total: child.expenses,
+        expenses: (currency, value),
+        total: (currency, child.expenses[currency] ?? 0),
       ),
     );
     emit(AddToNameState());
@@ -65,6 +69,16 @@ class HomeCubit extends Cubit<HomeStates> {
     child.stickerPath = ConstAssetImages.faces[index].path;
     hiveStorage.put(childrenNames[selectedIndex], child);
     emit(ChangeChildStickerState());
+  }
+
+  void changeAddChildCurrency(Currency currency) {
+    addChildCurrency = currency;
+    emit(ChangeAddChildCurrencyState());
+  }
+
+  void changeChildCurrency(Currency currency) {
+    childCurrency = currency;
+    emit(ChangeChildCurrencyState());
   }
 
 }

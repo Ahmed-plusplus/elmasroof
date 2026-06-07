@@ -1,3 +1,4 @@
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:hive/hive.dart';
 
 part 'child_model.g.dart';
@@ -8,7 +9,7 @@ class ChildModel {
   final String name;
 
   @HiveField(1)
-  double expenses;
+  Map<Currency,double> expenses;
 
   @HiveField(2)
   String stickerPath;

@@ -5,6 +5,7 @@ import 'package:elmasroof/cubit/radio_group_cubit/radio_group_cubit.dart';
 import 'package:elmasroof/modules/splash_screen.dart';
 import 'package:elmasroof/shared/bloc_observer.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
@@ -64,7 +65,7 @@ void callbackDispatcher() async {
   var list = hiveStorage.getKeys();
   for(var el in list){
     var child = hiveStorage.get(el);
-    child!.expenses += 10;
+    child!.expenses[Currency.pound] = (child.expenses[Currency.pound] ?? 0) + 10;
     hiveStorage.put(el, child);
   }
   ListenOnValue.expensesNotifier.value++;

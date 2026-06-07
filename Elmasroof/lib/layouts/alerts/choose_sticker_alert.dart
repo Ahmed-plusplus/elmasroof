@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 typedef OnChooseSticker = void Function(int index);
 
-void showChangeStickerAlert({
+void showChooseStickerAlert({
   required BuildContext context,
   required OnChooseSticker onChoose,
 }){
