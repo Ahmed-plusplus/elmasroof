@@ -29,7 +29,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   FocusNode passwordNode = FocusNode();
   FocusNode confirmPasswordNode = FocusNode();
   late AuthCubit authCubit;
-  ParentType parentType = ParentType.FATHER;
+  ParentType parentType = ParentType.father;
 
   @override
   Widget build(BuildContext context) {
