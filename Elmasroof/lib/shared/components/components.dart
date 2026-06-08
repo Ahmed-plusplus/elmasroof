@@ -164,16 +164,20 @@ Widget createTitle({
 Widget createButton({
   required String text,
   required Function onPressed,
+  double? width,
+  double verticalPadding = 8.0,
+  double horizontalPadding = 30.0,
   IconData? icon,
 }){
   return TextButton(
     onPressed: () => onPressed(),
     child: Container(
+      width: width,
       decoration: BoxDecoration(
         color: Colors.lightBlue,
         borderRadius: BorderRadius.circular(30.0),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 30.0),
+      padding: EdgeInsets.symmetric(vertical: verticalPadding, horizontal: horizontalPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,

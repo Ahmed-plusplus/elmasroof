@@ -37,25 +37,27 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(ChangeChildState());
   }
 
-  void addToName(Currency currency, double value){
+  Future<void> addToName(Currency currency, double value) async {
     var child = hiveStorage.get(childrenNames[selectedIndex])!;
     child.expenses[currency] = (child.expenses[currency] ?? 0) + value;
     hiveStorage.put(childrenNames[selectedIndex], child);
-    db.insertChildData(
-      ChildExpensesChangingModel(
-        name: childrenNames[selectedIndex],
-        expenses: (currency, value),
-        total: (currency, child.expenses[currency] ?? 0),
-      ),
+    emit(
+      AddToNameState(
+        await db.insertChildData(
+          ChildExpensesChangingModel(
+            name: childrenNames[selectedIndex],
+            expenses: (currency, value),
+            total: (currency, child.expenses[currency] ?? 0),
+          ),
+        )
+      )
     );
-    emit(AddToNameState());
   }
 
   void removeChild(){
     hiveStorage.remove(childrenNames[selectedIndex]);
     db.removeChild(childrenNames[selectedIndex]);
     childrenNames.removeAt(selectedIndex);
-    selectedIndex = 0;
     emit(RemoveChildState());
   }
 
@@ -79,6 +81,11 @@ class HomeCubit extends Cubit<HomeStates> {
   void changeChildCurrency(Currency currency) {
     childCurrency = currency;
     emit(ChangeChildCurrencyState());
+  }
+
+  void updateDescriptionOfTransaction(int id, String description){
+    db.updateDescription(id, description);
+    emit(UpdateDescriptionState());
   }
 
 }

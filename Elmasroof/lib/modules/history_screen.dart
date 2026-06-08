@@ -100,12 +100,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     (Currency, double) expenses = widget.transactionList[index].expenses;
                     return InkWell(
                       child: GestureDetector(
-                        onLongPress: () => widget.transactionList[index].description.isEmpty
-                            ? showAddDescriptionAlert(
-                              context: context,
-                              cubit: cubit,
-                              child: widget.transactionList[index],
-                            ) : null,
+                        onLongPress: () => showAddDescriptionAlert(
+                          context: context,
+                          onUpdateDescription: (id, description)
+                            => cubit.updateDescriptionOfTransaction(id, description),
+                          child: widget.transactionList[index],
+                          description: widget.transactionList[index].description,
+                        ),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),
                           padding: const EdgeInsets.all(8.0),

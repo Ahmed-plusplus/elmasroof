@@ -47,8 +47,8 @@ class SqfliteDB {
     return await _database.rawQuery(query, args);
   }
 
-  void insertChildData(ChildExpensesChangingModel child) {
-    _database.transaction((txn) {
+  Future<ChildExpensesChangingModel> insertChildData(ChildExpensesChangingModel child) async {
+    child.id = await _database.transaction((txn) {
       return txn
           .rawInsert('INSERT INTO ${TransactionConstants.TRANSACTION_TABLE} ('
               '${TransactionConstants.NAME_ATTR},'
@@ -64,10 +64,9 @@ class SqfliteDB {
               '${child.dateTime!.millisecondsSinceEpoch},'
               '"${child.description}",'
               '${child.total.$2}'
-              ')')
-          .then((value) {})
-          .catchError((error) => print(error.toString()));
+              ')');
     });
+    return child;
   }
 
   Future<List<ChildExpensesChangingModel>> getChildTransactions(String name) async {

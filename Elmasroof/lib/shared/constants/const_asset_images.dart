@@ -4,6 +4,7 @@ enum ConstAssetImages {
   coinsBank('assets/images/coins_bank.svg'),
   saveMoney('assets/images/save_money.jpeg'),
   richChildren('assets/images/rich_children.jpeg'),
+  success('assets/images/success.svg'),
   face1('assets/images/face_1.svg'),
   face2('assets/images/face_2.svg'),
   face3('assets/images/face_3.svg'),

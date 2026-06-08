@@ -2,8 +2,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_states.dart';
 import 'package:elmasroof/layouts/alerts/add_child_alert.dart';
+import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_currency_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_sticker_alert.dart';
+import 'package:elmasroof/layouts/alerts/remove_alert.dart';
+import 'package:elmasroof/layouts/alerts/success_dialog.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
@@ -39,13 +42,36 @@ class _HomeScreenState extends State<HomeScreen> {
   late HiveStorage hiveStorage = HiveStorage();
   late HomeCubit _cubit;
 
+  void initState() {
+    super.initState();
+    debugPrint('Home initState ${DateTime.now()}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('First frame rendered ${DateTime.now()}');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    debugPrint('Home build start ${DateTime.now()}');
+    final widget = Scaffold(
       appBar: appBarWidget(context: context),
       body: SingleChildScrollView(
         child: BlocConsumer<HomeCubit, HomeStates>(
-          listener: (context, state) {},
+          listener: (_context, state) {
+            if(state is AddChildState) {
+              nameController.text = '';
+              initExpensesController.text = '0';
+              showSuccessDialog(context: context, message: 'تمت الإضافة بنجاح');
+            } else if(state is RemoveChildState) {
+              showSuccessDialog(context: context, message: 'تم الحذف بنجاح');
+            } else if(state is AddToNameState) {
+              showAddDescriptionAlert(
+                context: context,
+                onUpdateDescription: (id, description) => _cubit.updateDescriptionOfTransaction(id, description),
+                child: state.child,
+              );
+            }
+          },
           builder: (context, state) {
             _cubit = HomeCubit.get(context);
             return Column(
@@ -63,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+    debugPrint('Home build end ${DateTime.now()}');
+    return widget;
   }
 
   Widget _childrenSlider() => CarouselSlider(
@@ -359,7 +387,10 @@ class _HomeScreenState extends State<HomeScreen> {
       createButton(
         text: 'حذف',
         onPressed: () {
-          _cubit.removeChild();
+          showRemoveAlert(
+            context: context,
+            onSuccess: () => _cubit.removeChild()
+          );
         },
         icon: Icons.delete_outline,
       ),

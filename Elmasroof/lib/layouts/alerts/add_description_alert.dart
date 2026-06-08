@@ -5,12 +5,15 @@ import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:flutter/material.dart';
 
+typedef OnUpdateDescription = void Function(int id, String description);
+
 void showAddDescriptionAlert({
   required BuildContext context,
-  required HistoryCubit cubit,
+  required OnUpdateDescription onUpdateDescription,
   required ChildExpensesChangingModel child,
+  String description = '',
 }){
-  TextEditingController descriptionController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController()..text = description;
   GlobalKey<FormFieldState> descriptionKey = GlobalKey();
   FocusNode descriptionNode = FocusNode();
   showGeneralDialog(
@@ -32,7 +35,7 @@ void showAddDescriptionAlert({
                   createTextField(
                       title: 'تفاصيل العملية',
                       hint: 'التفاصيل',
-                      height: 250,
+                      height: 100,
                       expand: true,
                       alignment: TextAlign.center,
                       controller: descriptionController,
@@ -51,7 +54,7 @@ void showAddDescriptionAlert({
                     onPressed: () {
                       if(descriptionKey.currentState!.validate()) {
                         child.description = descriptionController.text;
-                        cubit.updateDescriptionOfTransaction(child.id!, child.description);
+                        onUpdateDescription(child.id!, child.description);
                         Navigator.of(context).pop();
                       }
                     },
