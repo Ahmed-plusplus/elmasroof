@@ -47,6 +47,7 @@ void showRemoveAlert({
                         icon: Icons.close,
                         width: 100.0,
                         horizontalPadding: 8.0,
+                        backgroundColor: Colors.redAccent,
                         onPressed: (){
                           Navigator.of(context).pop(true);
                         }

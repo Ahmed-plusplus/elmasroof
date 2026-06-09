@@ -29,7 +29,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBarWidget(),
-      body: Column(
+      body: (widget.transactionList.isNotEmpty) ? Column(
         children: [
           createTitle(title: 'الإسم: ${widget.name}'),
           const SizedBox(height: 10,),
@@ -122,7 +122,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   const SizedBox(width: 5,),
                                   Text(time, style: const TextStyle(fontSize: 12),),
                                   const SizedBox(width: 35,),
-                                  SvgPicture.asset(expenses.$1.icon),
+                                  SvgPicture.asset(expenses.$1.icon, width: 22, height: 22,),
                                   const SizedBox(width: 25,),
                                   Expanded(
                                     child: Text(
@@ -182,7 +182,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
             }
           ),
         ],
-      ),
+      ) : Center(child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Transform.rotate(
+          angle: -0.3,
+          child: Text(
+            'لا توجد معاملات ل${widget.name}\nحتى الآن',
+            style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ))
     );
   }
 }

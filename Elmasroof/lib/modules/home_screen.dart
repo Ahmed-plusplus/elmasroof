@@ -365,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       createButton(
-        text: 'تاريخ المعاملات',
+        text: 'سجل المعاملات',
         onPressed: () {
           String name = _cubit.childrenNames[_cubit.selectedIndex];
           SqfliteDB().getChildTransactions(name)
@@ -386,6 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       createButton(
         text: 'حذف',
+        backgroundColor: Colors.redAccent,
         onPressed: () {
           showRemoveAlert(
             context: context,

@@ -167,6 +167,8 @@ Widget createButton({
   double? width,
   double verticalPadding = 8.0,
   double horizontalPadding = 30.0,
+  Color backgroundColor = Colors.lightBlue,
+  Color color = Colors.white,
   IconData? icon,
 }){
   return TextButton(
@@ -174,7 +176,7 @@ Widget createButton({
     child: Container(
       width: width,
       decoration: BoxDecoration(
-        color: Colors.lightBlue,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(30.0),
       ),
       padding: EdgeInsets.symmetric(vertical: verticalPadding, horizontal: horizontalPadding),
@@ -183,10 +185,10 @@ Widget createButton({
         mainAxisSize: MainAxisSize.min,
         children: [
           if(icon != null)
-            Icon(icon, color: Colors.white,),
+            Icon(icon, color: color,),
           if(icon != null)
             const SizedBox(width: 10,),
-          Text(text, style: const TextStyle(color: Colors.white, fontSize: 20.0),),
+          Text(text, style: TextStyle(color: color, fontSize: 20.0),),
         ],
       ),
     ),
