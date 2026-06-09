@@ -20,19 +20,22 @@ class ChildModelAdapter extends TypeAdapter<ChildModel> {
       name: fields[0] as String,
       expenses: (fields[1] as Map).cast<Currency, double>(),
       stickerPath: fields[2] as String,
+      increment: (fields[3] as Map).cast<Currency, double>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ChildModel obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.expenses)
       ..writeByte(2)
-      ..write(obj.stickerPath);
+      ..write(obj.stickerPath)
+      ..writeByte(3)
+      ..write(obj.increment);
   }
 
   @override

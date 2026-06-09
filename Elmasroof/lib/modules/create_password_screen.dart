@@ -1,4 +1,3 @@
-
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/auth_cubit/auth_states.dart';
 import 'package:elmasroof/layouts/custom_widget/radio_group/custom_radio_group.dart';
@@ -37,12 +36,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       appBar: appBarWidget(),
       body: Stack(
         children: [
-          // Positioned.fill(
-          //   child: SvgPicture.asset(
-          //     'assets/images/saving_money.svg',
-          //     // fit: BoxFit.fill,
-          //   ),
-          // ),
           Center(
             child: SingleChildScrollView(
               child: Column(
@@ -56,32 +49,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                   const SizedBox(height: 20,),
                   _passwordField(),
                   _repasswordField(),
-                  BlocConsumer<AuthCubit, AuthStates>(
-                    listener: (context, state) {},
-                    builder: (context, state) {
-                      authCubit = AuthCubit.get(context);
-                      return (widget.isSupported //&& widget.availableBiometric.isNotEmpty
-                          && authCubit.isPasswordReady) ?
-                      _biometricButton()
-                          : Container();
-                    },
-                  ),
-
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: widget.availableBiometric.map(
-                  //       (type) {
-                  //         switch(type){
-                  //           case BiometricType.fingerprint:
-                  //             return fingerprintButton();
-                  //           case BiometricType.face:
-                  //             return faceRecognationButton();
-                  //           default:
-                  //             return Container();
-                  //         }
-                  //       }
-                  //   ).toList(),
-                  // ),
+                  _handleBiometricButton(),
                   createButton(
                     text: 'دخول',
                     onPressed: () => _submit(),
@@ -139,7 +107,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       formKey: confirmPasswordKey,
       controller: confirmPasswordController,
       node: confirmPasswordNode,
-      // submit: (value) => _submit(),
       validator: (String value){
         if(value.isEmpty) {
           return 'أكد كلمة المرور أولاً';
@@ -160,6 +127,17 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
           }
         }
       }
+  );
+
+  Widget _handleBiometricButton() => BlocConsumer<AuthCubit, AuthStates>(
+    listener: (context, state) {},
+    builder: (context, state) {
+      authCubit = AuthCubit.get(context);
+      return (widget.isSupported //&& widget.availableBiometric.isNotEmpty
+          && authCubit.isPasswordReady) ?
+      _biometricButton()
+          : Container();
+    },
   );
 
   Widget _biometricButton() => Padding(

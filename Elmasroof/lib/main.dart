@@ -1,7 +1,6 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
-import 'package:elmasroof/cubit/radio_group_cubit/radio_group_cubit.dart';
 import 'package:elmasroof/modules/splash_screen.dart';
 import 'package:elmasroof/shared/bloc_observer.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
@@ -15,23 +14,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  await HiveStorage.getInstance();
-  await SqfliteDB.createDB();
-  Bloc.observer = MyBlocObserver();
-  await SharedManager.init();
-
-  // await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-
-  // Workmanager().registerPeriodicTask(
-  //   "ElmasroofTEST",
-  //   "dailyTask",
-  //   frequency: const Duration(minutes: 15),
-  //   backoffPolicy: BackoffPolicy.exponential,
-  //   backoffPolicyDelay: Duration(minutes: 1), // How long to wait before retrying
-  //   initialDelay: Duration(/*hours: DateTime.now().hour, minutes: DateTime.now().minute, */seconds: 5)
-  //   // initialDelay: Duration(hours: 24 - DateTime.now().hour, minutes: -DateTime.now().minute),
-  // );
+  await init();
+  handleIncrementalExpenses();
   runApp(const MyApp());
 }
 
@@ -58,16 +42,50 @@ class MyApp extends StatelessWidget {
   }
 }
 
-void callbackDispatcher() async {
+Future<void> init() async{
   await Hive.initFlutter();
   await HiveStorage.getInstance();
+  await SqfliteDB.createDB();
+  Bloc.observer = MyBlocObserver();
+  await SharedManager.init();
+}
+
+void handleIncrementalExpenses(){
+  var currentDate = DateTime.now();
+  var lastDateAsString = SharedManager.getData(key: SharedManager.LAST_DATE) as String?;
+  if(lastDateAsString == null) {
+    lastDateAsString = currentDate.toIso8601String();
+    SharedManager.putData(
+        key: SharedManager.LAST_DATE, value: lastDateAsString);
+  }
+  var lastDate = DateTime.parse(lastDateAsString);
+  if(lastDate.day != currentDate.day || lastDate.month != currentDate.month || lastDate.year != currentDate.year) {
+    int numberOfDays = currentDate.difference(lastDate).inDays;
+    increaseExpenses(days: numberOfDays);
+    SharedManager.putData(
+        key: SharedManager.LAST_DATE, value: currentDate.toIso8601String());
+  }
+  var nextDate = DateTime(currentDate.year, currentDate.month, currentDate.day + 1);
+  var delay = nextDate.difference(currentDate);
+  startNewDay(delay);
+}
+
+void increaseExpenses({int days = 1}) async {
   HiveStorage hiveStorage = HiveStorage();
   var list = hiveStorage.getKeys();
   for(var el in list){
     var child = hiveStorage.get(el);
-    child!.expenses[Currency.pound] = (child.expenses[Currency.pound] ?? 0) + 10;
-    hiveStorage.put(el, child);
+    for(var curr in Currency.values) {
+      child!.expenses[curr] = (child.expenses[curr] ?? 0) + (child.increment[curr] ?? 0) * days;
+    }
+    hiveStorage.put(el, child!);
   }
   ListenOnValue.expensesNotifier.value++;
-  print('increase: ${DateTime.now()}');
+}
+
+void startNewDay(Duration delay) {
+  Future.delayed(delay, () {
+    increaseExpenses();
+    startNewDay(Duration(days: 1));
+  });
 }

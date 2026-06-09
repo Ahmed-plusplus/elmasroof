@@ -62,7 +62,6 @@ class _SplashScreenState extends State<SplashScreen> {
               : EnterPasswordScreen(
                   isSupported: _isSupported,
                   availableBiometric: _availableBiometric),
-      // : HomeScreen(),
     ));
   }
 }

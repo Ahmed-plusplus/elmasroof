@@ -7,6 +7,7 @@ class SharedManager {
   static const String LOGIN_BIOMETRIC = 'loginBiometric';
 
   static const String PARENT_TYPE = 'parentType';
+  static const String LAST_DATE = 'lastDate';
 
   static init() async {
     _sharedPref = await SharedPreferences.getInstance();

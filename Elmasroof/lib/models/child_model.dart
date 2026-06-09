@@ -14,9 +14,13 @@ class ChildModel {
   @HiveField(2)
   String stickerPath;
 
+  @HiveField(3)
+  Map<Currency,double> increment;
+
   ChildModel({
     required this.name,
     required this.expenses,
     required this.stickerPath,
+    required this.increment,
   });
 }

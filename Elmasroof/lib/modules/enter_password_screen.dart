@@ -31,7 +31,7 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
     // TODO: implement initState
     super.initState();
     authCubit = AuthCubit.get(context);
-    if (widget.isSupported //&& widget.availableBiometric.isNotEmpty
+    if (widget.isSupported
         && (SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false)) {
       authBiometric();
     }
@@ -50,15 +50,7 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
               Image.asset(ConstAssetImages.balance.path),
               SizedBox(height: 10,),
               passwordField(),
-              BlocConsumer<AuthCubit, AuthStates>(
-                listener: (context, state) {},
-                builder: (context, state) {
-                  authCubit = AuthCubit.get(context);
-                  return (widget.isSupported //&& widget.availableBiometric.isNotEmpty
-                     && (SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false))
-                      ? _biometricButton() : Container();
-                },
-              ),
+              _handleBiometricButton(),
               SizedBox(height: 10,),
               createButton(
                 text: 'دخول',
@@ -74,7 +66,6 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
 
   void _submit() {
     if(passwordKey.currentState!.validate()){
-      // SharedManager.putData(key: SharedManager.LOGIN_PASSWORD, value: passwordController.text);
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));
     }
   }
@@ -95,6 +86,16 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
         }
         return null;
       }
+  );
+
+  Widget _handleBiometricButton() => BlocConsumer<AuthCubit, AuthStates>(
+    listener: (context, state) {},
+    builder: (context, state) {
+      authCubit = AuthCubit.get(context);
+      return (widget.isSupported
+          && (SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false))
+          ? _biometricButton() : Container();
+    },
   );
 
   Widget _biometricButton() => Padding(
