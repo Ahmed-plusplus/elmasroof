@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_states.dart';
@@ -12,6 +13,7 @@ import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
+import 'package:elmasroof/shared/constants/const_asset_sounds.dart';
 import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
@@ -41,14 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   FocusNode initExpensesNode = FocusNode();
   late HiveStorage hiveStorage = HiveStorage();
   late HomeCubit _cubit;
-
-  void initState() {
-    super.initState();
-    debugPrint('Home initState ${DateTime.now()}');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('First frame rendered ${DateTime.now()}');
-    });
-  }
+  final _audioPlayer = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   IconButton(
                     padding: const EdgeInsets.all(4),
-                    onPressed: () {
+                    onPressed: () async {
                       if(_expensesChangeKey.currentState!.validate()) {
                         if(_expensesChangeController.text.isEmpty || _expensesChangeController.text == '0'){
                           _expensesChangeController.text = '0';
@@ -307,6 +302,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                         double value = double.parse(_expensesChangeController.text);
                         _expensesChangeController.text = '0';
+                        await _audioPlayer.setVolume(0.2);
+                        await _audioPlayer.play(AssetSource(ConstAssetSounds.decreaseMoney.path));
                         _cubit.addToName(_cubit.childCurrency, -value);
                       }
                     },
@@ -330,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   IconButton(
                     padding: const EdgeInsets.all(4),
-                    onPressed: () {
+                    onPressed: () async {
                       if(_expensesChangeKey.currentState!.validate()) {
                         if(_expensesChangeController.text.isEmpty || _expensesChangeController.text == '0'){
                           _expensesChangeController.text = '0';
@@ -347,6 +344,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                         double value = double.parse(_expensesChangeController.text);
                         _expensesChangeController.text = '0';
+                        await _audioPlayer.setVolume(0.2);
+                        await _audioPlayer.play(AssetSource(ConstAssetSounds.increaseMoney.path));
                         _cubit.addToName(_cubit.childCurrency, value);
                       }
                     },
