@@ -13,6 +13,7 @@ import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/constants/const_asset_sounds.dart';
+import 'package:elmasroof/shared/enum/reward.dart';
 import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
@@ -82,39 +83,139 @@ class _HomeScreenState extends State<HomeScreen> {
     }).toList() + [ childrenCard('إضافة\nإبن/بنت\n+', true), ],
   );
 
-  Widget childrenCard(String name, bool isAddCard) => Card.outlined(
-    color: isAddCard ? null : Colors.lightBlue,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-      side: isAddCard
-          ? BorderSide(color: Colors.lightBlue, width: 2,)
-          : BorderSide.none,
-    ),
-    margin: EdgeInsets.all(24),
-    child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if(!isAddCard)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GestureDetector(
-                onLongPress: () => showChooseStickerAlert(context: context, onChoose: (index) => _cubit.changeChildSticker(index)),
-                child: Container(
-                  decoration: ShapeDecoration(shape: CircleBorder(side: BorderSide(color: Colors.white, width: 2)), color: Colors.white12),
-                  padding: const EdgeInsets.all(16.0),
-                  child: SvgPicture.asset(_cubit.hiveStorage.get(name)!.stickerPath, fit: BoxFit.contain, width: 40, height: 40,),
-                ),
+  Widget childrenCard(String name, bool isAddCard) {
+    var child = _cubit.hiveStorage.get(name);
+    return Card.outlined(
+      color: isAddCard ? null : Colors.lightBlue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: isAddCard
+            ? BorderSide(color: Colors.lightBlue, width: 2,)
+            : BorderSide.none,
+      ),
+      margin: EdgeInsets.all(24),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if(!isAddCard)
+              Column(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                        onPressed: () => null,
+                        icon: Icon(Icons.add, color: Colors.lightBlue,)
+                    ),
+                  ),
+                  Spacer(),
+                  CircleAvatar(
+                    backgroundColor: Colors.redAccent,
+                    child: IconButton(
+                        onPressed: () => null,
+                        icon: Icon(Icons.not_interested, color: Colors.white,)
+                    ),
+                  ),
+                ],
+              ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if(!isAddCard)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onLongPress: () =>
+                            showChooseStickerAlert(
+                            context: context, onChoose: (index) =>
+                            _cubit.changeChildSticker(index)),
+                        child: Container(
+                          decoration: ShapeDecoration(shape: CircleBorder(
+                              side: BorderSide(color: Colors.white, width: 2)),
+                              color: Colors.white12),
+                          padding: const EdgeInsets.all(16.0),
+                          child: SvgPicture.asset(child!.stickerPath, fit: BoxFit.contain,
+                            width: 40,
+                            height: 40,),
+                        ),
+                      ),
+                    ),
+                  Text(
+                    name, textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold,),
+                  ),
+                ],
               ),
             ),
-          Text(
-            name, textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
-          ),
-        ],
+            if(!isAddCard)
+              Expanded(
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Tooltip(
+                        message: Reward.master.name,
+                        triggerMode: TooltipTriggerMode.longPress,
+                        waitDuration: const Duration(milliseconds: 500),
+                        showDuration: const Duration(seconds: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        preferBelow: false,
+                        child: SvgPicture.asset(
+                          Reward.master.iconPath,
+                          colorFilter: (child!.rewards[Reward.master]?.$2 ?? false)
+                              ? null
+                              : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 4.0),
+                        child: GridView.count(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 3.0,
+                          mainAxisSpacing: 2.0,
+                          children: Reward.values.map((reward) =>
+                              Padding(
+                                padding: const EdgeInsets.all(1.0),
+                                child: Tooltip(
+                                  message: reward.name,
+                                  triggerMode: TooltipTriggerMode.longPress,
+                                  waitDuration: const Duration(milliseconds: 500),
+                                  showDuration: const Duration(seconds: 2),
+                                  preferBelow: false,
+                                  child: SizedBox(
+                                    width: 10,
+                                    height: 10,
+                                    child: SvgPicture.asset(
+                                      reward.iconPath,
+                                      colorFilter: (child.rewards[reward]?.$2 ?? false)
+                                          ? null
+                                          : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ).toList()..removeLast(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _addChildPage(BuildContext context) => Padding(
     padding: const EdgeInsets.all(8.0),
@@ -146,10 +247,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _cubit.addChild(
           nameController.text,
           ChildModel(
-              name: nameController.text,
-              expenses: {_cubit.addChildCurrency: value},
-              stickerPath: _cubit.stickerPath,
-              increment: {}
+            name: nameController.text,
+            expenses: {_cubit.addChildCurrency: value},
+            stickerPath: _cubit.stickerPath,
+            increment: {},
+            rewards: {},
           )
       );
     }

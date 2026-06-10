@@ -1,3 +1,4 @@
+import 'package:elmasroof/shared/enum/reward.dart';
 import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:hive/hive.dart';
 
@@ -17,10 +18,18 @@ class ChildModel {
   @HiveField(3)
   Map<Currency,double> increment;
 
+  @HiveField(4)
+  DateTime? punishmentUntil;
+
+  @HiveField(5)
+  Map<Reward, (double value, bool taken)> rewards;
+
   ChildModel({
     required this.name,
     required this.expenses,
     required this.stickerPath,
     required this.increment,
+    this.punishmentUntil,
+    required this.rewards,
   });
 }

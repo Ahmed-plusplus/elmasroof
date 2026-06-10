@@ -21,13 +21,15 @@ class ChildModelAdapter extends TypeAdapter<ChildModel> {
       expenses: (fields[1] as Map).cast<Currency, double>(),
       stickerPath: fields[2] as String,
       increment: (fields[3] as Map).cast<Currency, double>(),
+      punishmentUntil: fields[4] as DateTime?,
+      rewards: (fields[5] as Map).cast<Reward, (double, bool)>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ChildModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -35,7 +37,11 @@ class ChildModelAdapter extends TypeAdapter<ChildModel> {
       ..writeByte(2)
       ..write(obj.stickerPath)
       ..writeByte(3)
-      ..write(obj.increment);
+      ..write(obj.increment)
+      ..writeByte(4)
+      ..write(obj.punishmentUntil)
+      ..writeByte(5)
+      ..write(obj.rewards);
   }
 
   @override
