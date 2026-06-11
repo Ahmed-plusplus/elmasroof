@@ -5,6 +5,8 @@ import 'package:elmasroof/cubit/home_cubit/home_states.dart';
 import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_currency_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_sticker_alert.dart';
+import 'package:elmasroof/layouts/alerts/determine_daily_expenses_alert.dart';
+import 'package:elmasroof/layouts/alerts/punish_child_alert.dart';
 import 'package:elmasroof/layouts/alerts/remove_alert.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
 import 'package:elmasroof/models/child_model.dart';
@@ -103,17 +105,18 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.lightBlue,
                     child: IconButton(
-                        onPressed: () => null,
-                        icon: Icon(Icons.add, color: Colors.lightBlue,)
+                      padding: const EdgeInsets.all(0),
+                      onPressed: () => showDetermineDailyExpensesAlert(context: context, child: child!),
+                      icon: SvgPicture.asset(ConstAssetImages.giveCoin.path),
                     ),
                   ),
                   Spacer(),
                   CircleAvatar(
                     backgroundColor: Colors.redAccent,
                     child: IconButton(
-                        onPressed: () => null,
+                        onPressed: () => showPunishChildAlert(context: context, child: child!),
                         icon: Icon(Icons.not_interested, color: Colors.white,)
                     ),
                   ),

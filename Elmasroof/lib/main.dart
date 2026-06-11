@@ -1,4 +1,5 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
+import 'package:elmasroof/cubit/daily_expenses_cubit/daily_expenses_cubit.dart';
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/modules/splash_screen.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => AuthCubit(),),
         BlocProvider(create: (context) => HomeCubit(HiveStorage()),),
         BlocProvider(create: (context) => HistoryCubit(),),
+        BlocProvider(create: (context) => DailyExpensesCubit(),),
       ],
       child: MaterialApp(
         title: 'Elmasroof',
@@ -71,12 +73,28 @@ void handleIncrementalExpenses(){
 }
 
 void increaseExpenses({int days = 1}) async {
+  DateTime today = DateTime.now();
   HiveStorage hiveStorage = HiveStorage();
   var list = hiveStorage.getKeys();
   for(var el in list){
     var child = hiveStorage.get(el);
     for(var curr in Currency.values) {
       child!.expenses[curr] = (child.expenses[curr] ?? 0) + (child.increment[curr] ?? 0) * days;
+      /// if(today <= punishUntil) decrease for all days
+      /// else if(today - days < punishUntil) decrease (punishUntil - today + days) days
+      if(child.punishmentUntil != null){
+        /// print(today.compareTo(future)); // -1
+        /// print(today.compareTo(past)); // 1
+        /// print(today.compareTo(newDate)); // 0
+        if(today.compareTo(child.punishmentUntil!) < 1){
+          child.expenses[curr] = (child.expenses[curr] ?? 0) - (child.increment[curr] ?? 0) * days;
+        } else if(today.subtract(Duration(days: days)).compareTo(child.punishmentUntil!) == -1){
+          child.expenses[curr] = (child.expenses[curr] ?? 0)
+              - (child.increment[curr] ?? 0) * (child.punishmentUntil!.difference(today).inDays + days);
+        } else {
+          child.punishmentUntil = null;
+        }
+      }
     }
     hiveStorage.put(el, child!);
   }
