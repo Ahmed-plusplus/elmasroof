@@ -4,6 +4,7 @@ import 'package:elmasroof/modules/create_password_screen.dart';
 import 'package:elmasroof/modules/enter_password_screen.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/extensions/date_time_extension.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
@@ -73,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> handleIncrementalExpenses() async{
-    var currentDate = DateTime.now();
+    var currentDate = DateTime.now().dateOnly();
     var lastDateAsString = SharedManager.getData(key: SharedManager.LAST_DATE) as String?;
     if(lastDateAsString == null) {
       lastDateAsString = currentDate.toIso8601String();
@@ -81,19 +82,18 @@ class _SplashScreenState extends State<SplashScreen> {
           key: SharedManager.LAST_DATE, value: lastDateAsString);
     }
     var lastDate = DateTime.parse(lastDateAsString);
-    if(lastDate.day != currentDate.day || lastDate.month != currentDate.month || lastDate.year != currentDate.year) {
+    if(lastDate.isAtSameMomentAs(currentDate)) {
       int numberOfDays = currentDate.difference(lastDate).inDays;
-      await increaseExpenses(days: numberOfDays);
+      await increaseExpenses(today: currentDate,days: numberOfDays);
       SharedManager.putData(
           key: SharedManager.LAST_DATE, value: currentDate.toIso8601String());
     }
-    var nextDate = DateTime(currentDate.year, currentDate.month, currentDate.day + 1);
-    var delay = nextDate.difference(currentDate);
+    var nextDate = currentDate.add(Duration(days: 1));
+    var delay = nextDate.difference(DateTime.now());
     startNewDay(delay);
   }
 
-  Future<void> increaseExpenses({int days = 1}) async {
-    DateTime today = DateTime.now();
+  Future<void> increaseExpenses({required DateTime today, int days = 1}) async {
     HiveStorage hiveStorage = HiveStorage();
     SqfliteDB db = SqfliteDB();
     var list = hiveStorage.getKeys();
@@ -113,17 +113,17 @@ class _SplashScreenState extends State<SplashScreen> {
             child.expenses[curr] = (child.expenses[curr] ?? 0)
                 - (child.increment[curr] ?? 0) * (child.punishmentUntil!.difference(today).inDays + days);
             if((child.increment[curr] ?? 0) > 0) {
-              await storeIncrements(db, child, curr, child.punishmentUntil!.difference(today).inDays + days);
+              await storeIncrements(db, child, curr, today, child.punishmentUntil!.difference(today).inDays + days);
             }
           } else {
             child.punishmentUntil = null;
             if((child.increment[curr] ?? 0) > 0) {
-              await storeIncrements(db, child, curr, days);
+              await storeIncrements(db, child, curr, today, days);
             }
           }
         } else {
           if((child.increment[curr] ?? 0) > 0) {
-            await storeIncrements(db, child, curr, days);
+            await storeIncrements(db, child, curr, today, days);
           }
         }
       }
@@ -132,8 +132,7 @@ class _SplashScreenState extends State<SplashScreen> {
     ListenOnValue.expensesNotifier.value++;
   }
 
-  Future<void> storeIncrements(SqfliteDB db, ChildModel child, Currency curr, int days) async{
-    DateTime today = DateTime.now().copyWith(hour: 0, minute: 0, second: 0);
+  Future<void> storeIncrements(SqfliteDB db, ChildModel child, Currency curr, DateTime today, int days) async{
     for (int i = days; i > 0; i--) {
       await db.insertChildData(
           ChildExpensesChangingModel(
@@ -148,8 +147,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void startNewDay(Duration delay) {
-    Future.delayed(delay, () {
-      increaseExpenses();
+    Future.delayed(delay, () async{
+      await increaseExpenses(today: DateTime.now().dateOnly());
       startNewDay(Duration(days: 1));
     });
   }
