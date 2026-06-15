@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
+import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:flutter/material.dart';
 
 void showPunishChildAlert({
@@ -53,6 +54,8 @@ void showPunishChildAlert({
                       if(daysKey.currentState!.validate()) {
                         child.punishmentUntil = (child.punishmentUntil ?? DateTime.now())
                             .add(Duration(days: int.parse(daysController.text)));
+                        HiveStorage hiveStorage = HiveStorage();
+                        hiveStorage.put(child.name, child);
                         Navigator.of(context).pop();
                       }
                     },
