@@ -82,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
           key: SharedManager.LAST_DATE, value: lastDateAsString);
     }
     var lastDate = DateTime.parse(lastDateAsString);
-    if(lastDate.isAtSameMomentAs(currentDate)) {
+    if(!lastDate.isAtSameMomentAs(currentDate)) {
       int numberOfDays = currentDate.difference(lastDate).inDays;
       await increaseExpenses(today: currentDate,days: numberOfDays);
       SharedManager.putData(
@@ -109,17 +109,13 @@ class _SplashScreenState extends State<SplashScreen> {
           /// print(today.compareTo(newDate)); // 0
           if(today.compareTo(child.punishmentUntil!) < 1){
             child.expenses[curr] = (child.expenses[curr] ?? 0) - (child.increment[curr] ?? 0) * days;
-          } else if(today.subtract(Duration(days: days)).compareTo(child.punishmentUntil!) == -1){
-            child.expenses[curr] = (child.expenses[curr] ?? 0)
-                - (child.increment[curr] ?? 0) * (child.punishmentUntil!.difference(today).inDays + days);
-            if((child.increment[curr] ?? 0) > 0) {
-              await storeIncrements(db, child, curr, today, child.punishmentUntil!.difference(today).inDays + days);
-            }
           } else {
-            child.punishmentUntil = null;
+            child.expenses[curr] = (child.expenses[curr] ?? 0)
+                - (child.increment[curr] ?? 0) * (child.punishmentUntil!.difference(today).inDays + days); // subtract from punish days
             if((child.increment[curr] ?? 0) > 0) {
-              await storeIncrements(db, child, curr, today, days);
+              await storeIncrements(db, child, curr, today, today.difference(child.punishmentUntil!).inDays); // number of days after punish
             }
+            child.punishmentUntil = null;
           }
         } else {
           if((child.increment[curr] ?? 0) > 0) {
@@ -133,13 +129,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> storeIncrements(SqfliteDB db, ChildModel child, Currency curr, DateTime today, int days) async{
-    for (int i = days; i > 0; i--) {
+    for (int i = days - 1; i >= 0; i--) {
       await db.insertChildData(
           ChildExpensesChangingModel(
               name: child.name,
               expenses: (curr, child.increment[curr]!),
               total: (curr, child.expenses[curr]! - (child.increment[curr]! * i)),
-              dateTime: today.subtract(Duration(days: i - 1)),
+              dateTime: today.subtract(Duration(days: i)),
               description: 'زيادة يومية'
           )
       );
