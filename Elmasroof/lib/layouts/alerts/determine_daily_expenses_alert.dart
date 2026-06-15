@@ -8,6 +8,7 @@ import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
+import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -79,6 +80,8 @@ void showDetermineDailyExpensesAlert({
                     onPressed: () {
                       if(expensesKey.currentState!.validate()) {
                         child.increment[cubit.currency] = double.parse(expensesController.text);
+                        HiveStorage hiveStorage = HiveStorage();
+                        hiveStorage.put(child.name, child);
                         Navigator.of(context).pop();
                       }
                     },

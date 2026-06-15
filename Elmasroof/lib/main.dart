@@ -2,6 +2,8 @@ import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/daily_expenses_cubit/daily_expenses_cubit.dart';
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
+import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/splash_screen.dart';
 import 'package:elmasroof/shared/bloc_observer.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
@@ -16,7 +18,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await init();
-  handleIncrementalExpenses();
   runApp(const MyApp());
 }
 
@@ -50,60 +51,4 @@ Future<void> init() async{
   await SqfliteDB.createDB();
   Bloc.observer = MyBlocObserver();
   await SharedManager.init();
-}
-
-void handleIncrementalExpenses(){
-  var currentDate = DateTime.now();
-  var lastDateAsString = SharedManager.getData(key: SharedManager.LAST_DATE) as String?;
-  if(lastDateAsString == null) {
-    lastDateAsString = currentDate.toIso8601String();
-    SharedManager.putData(
-        key: SharedManager.LAST_DATE, value: lastDateAsString);
-  }
-  var lastDate = DateTime.parse(lastDateAsString);
-  if(lastDate.day != currentDate.day || lastDate.month != currentDate.month || lastDate.year != currentDate.year) {
-    int numberOfDays = currentDate.difference(lastDate).inDays;
-    increaseExpenses(days: numberOfDays);
-    SharedManager.putData(
-        key: SharedManager.LAST_DATE, value: currentDate.toIso8601String());
-  }
-  var nextDate = DateTime(currentDate.year, currentDate.month, currentDate.day + 1);
-  var delay = nextDate.difference(currentDate);
-  startNewDay(delay);
-}
-
-void increaseExpenses({int days = 1}) async {
-  DateTime today = DateTime.now();
-  HiveStorage hiveStorage = HiveStorage();
-  var list = hiveStorage.getKeys();
-  for(var el in list){
-    var child = hiveStorage.get(el);
-    for(var curr in Currency.values) {
-      child!.expenses[curr] = (child.expenses[curr] ?? 0) + (child.increment[curr] ?? 0) * days;
-      /// if(today <= punishUntil) decrease for all days
-      /// else if(today - days < punishUntil) decrease (punishUntil - today + days) days
-      if(child.punishmentUntil != null){
-        /// print(today.compareTo(future)); // -1
-        /// print(today.compareTo(past)); // 1
-        /// print(today.compareTo(newDate)); // 0
-        if(today.compareTo(child.punishmentUntil!) < 1){
-          child.expenses[curr] = (child.expenses[curr] ?? 0) - (child.increment[curr] ?? 0) * days;
-        } else if(today.subtract(Duration(days: days)).compareTo(child.punishmentUntil!) == -1){
-          child.expenses[curr] = (child.expenses[curr] ?? 0)
-              - (child.increment[curr] ?? 0) * (child.punishmentUntil!.difference(today).inDays + days);
-        } else {
-          child.punishmentUntil = null;
-        }
-      }
-    }
-    hiveStorage.put(el, child!);
-  }
-  ListenOnValue.expensesNotifier.value++;
-}
-
-void startNewDay(Duration delay) {
-  Future.delayed(delay, () {
-    increaseExpenses();
-    startNewDay(Duration(days: 1));
-  });
 }

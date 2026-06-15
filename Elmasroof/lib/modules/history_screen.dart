@@ -94,34 +94,36 @@ class _HistoryScreenState extends State<HistoryScreen> {
     ),
   );
 
-  Widget _itemList() => ValueListenableBuilder(
-      valueListenable: ListenOnValue.expensesNotifier,
-      child: const SizedBox(height: 2,),
-      builder: (context, value, child) {
-        return ListView.separated(
-          itemBuilder: (context, index) => BlocConsumer<HistoryCubit, HistoryStates>(
-              listener: (context, state) {},
-              builder: (context, state) {
-                cubit = HistoryCubit.get(context);
-                String dateTime = widget.transactionList[index].dateTime!.toString();
-                String date = dateTime.substring(0, dateTime.indexOf(' '));
-                String time = dateTime.substring(dateTime.indexOf(' ') + 1, dateTime.indexOf('.'));
-                (Currency, double) expenses = widget.transactionList[index].expenses;
-                return _item(
-                  child: widget.transactionList[index],
-                  date: date,
-                  time: time,
-                  currency: expenses.$1,
-                  value: expenses.$2,
-                  total: widget.transactionList[index].total,
-                );
-              }
-          ),
-          separatorBuilder: (context, index) => child ?? const SizedBox(height: 2,),
-          itemCount: widget.transactionList.length,
-          shrinkWrap: true,
-        );
-      }
+  Widget _itemList() => Expanded(
+    child: ValueListenableBuilder(
+        valueListenable: ListenOnValue.expensesNotifier,
+        child: const SizedBox(height: 2,),
+        builder: (context, value, child) {
+          return ListView.separated(
+            itemBuilder: (context, index) => BlocConsumer<HistoryCubit, HistoryStates>(
+                listener: (context, state) {},
+                builder: (context, state) {
+                  cubit = HistoryCubit.get(context);
+                  String dateTime = widget.transactionList[index].dateTime!.toString();
+                  String date = dateTime.substring(0, dateTime.indexOf(' '));
+                  String time = dateTime.substring(dateTime.indexOf(' ') + 1, dateTime.indexOf('.'));
+                  (Currency, double) expenses = widget.transactionList[index].expenses;
+                  return _item(
+                    child: widget.transactionList[index],
+                    date: date,
+                    time: time,
+                    currency: expenses.$1,
+                    value: expenses.$2,
+                    total: widget.transactionList[index].total,
+                  );
+                }
+            ),
+            separatorBuilder: (context, index) => child ?? const SizedBox(height: 2,),
+            itemCount: widget.transactionList.length,
+            shrinkWrap: true,
+          );
+        }
+    ),
   );
 
   Widget _item({
