@@ -22,7 +22,7 @@ class ChildModelAdapter extends TypeAdapter<ChildModel> {
       stickerPath: fields[2] as String,
       increment: (fields[3] as Map).cast<Currency, double>(),
       punishmentUntil: fields[4] as DateTime?,
-      rewards: (fields[5] as Map).cast<Reward, (double, bool)>(),
+      rewards: (fields[5] as Map).cast<Reward, (double, bool, bool)>(),
     );
   }
 

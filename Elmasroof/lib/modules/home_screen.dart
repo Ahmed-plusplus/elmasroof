@@ -8,14 +8,19 @@ import 'package:elmasroof/layouts/alerts/choose_sticker_alert.dart';
 import 'package:elmasroof/layouts/alerts/determine_daily_expenses_alert.dart';
 import 'package:elmasroof/layouts/alerts/punish_child_alert.dart';
 import 'package:elmasroof/layouts/alerts/remove_alert.dart';
+import 'package:elmasroof/layouts/alerts/reward_dialog.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/constants/const_asset_sounds.dart';
+import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/enum/reward.dart';
+import 'package:elmasroof/shared/enum/transaction_type.dart';
+import 'package:elmasroof/shared/extensions/date_time_extension.dart';
 import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
@@ -45,6 +50,54 @@ class _HomeScreenState extends State<HomeScreen> {
   late HiveStorage hiveStorage = HiveStorage();
   late HomeCubit _cubit;
   final _audioPlayer = AudioPlayer();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _cubit = HomeCubit.get(context);
+    List<(ChildModel, Reward)> rewardList = [];
+    for(String name in _cubit.childrenNames){
+      ChildModel childModel = _cubit.hiveStorage.get(name)!;
+      for(Reward reward in Reward.values){
+        var childReward = childModel.rewards[reward];
+        if(childReward == null) continue;
+        if(/*childReward.$1 > 0 &&*/ childReward.$2 && !childReward.$3){
+          rewardList.add((childModel, reward));
+        }
+      }
+    }
+    _showRewards(rewardList, 0);
+  }
+
+  void _showRewards(List<(ChildModel, Reward)> rewardList, int index){
+    if(rewardList.isNotEmpty){
+      (ChildModel, Reward) item = rewardList[index];
+      showRewardDialog(
+        context: context,
+        name: item.$1.name,
+        reward: item.$2,
+        onDismiss: () async{
+          var it = item.$1.rewards[item.$2]!;
+          item.$1.rewards[item.$2] = (it.$1, true, true);
+          item.$1.expenses[Currency.pound] = (item.$1.expenses[Currency.pound] ?? 0.0) + it.$1;
+          SqfliteDB db = SqfliteDB();
+          await db.insertChildData(
+            ChildExpensesChangingModel(
+              name: item.$1.name,
+              expenses: (Currency.pound, it.$1),
+              total: (Currency.pound, item.$1.expenses[Currency.pound] ?? 0.0),
+              dateTime: DateTime.now(),
+              description: 'مكافأة شارة ${item.$2.name}'
+            ),
+            TransactionType.customTransaction,
+          );
+          _cubit.hiveStorage.put(item.$1.name, item.$1);
+          _showRewards(rewardList, index + 1);
+        }
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -269,11 +322,12 @@ class _HomeScreenState extends State<HomeScreen> {
     ],
   );
 
-  void _handleStates(BuildContext context, HomeStates state) {
+  void _handleStates(BuildContext context, HomeStates state) async{
     if(state is AddChildState) {
       nameController.text = '';
       initExpensesController.text = '0';
-      showSuccessDialog(context: context, message: 'تمت الإضافة بنجاح');
+      showSuccessDialog(context: context, message: 'تمت الإضافة بنجاح',
+        onDismiss: () async => await handleReward(state.childModel, _cubit.addChildCurrency),);
     } else if(state is RemoveChildState) {
       showSuccessDialog(context: context, message: 'تم الحذف بنجاح');
     } else if(state is AddToNameState) {
@@ -282,6 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onUpdateDescription: (id, description) => _cubit.updateDescriptionOfTransaction(id, description),
         child: state.child,
       );
+      await handleReward(state.childModel, _cubit.childCurrency);
     }
   }
 
@@ -502,4 +557,81 @@ class _HomeScreenState extends State<HomeScreen> {
     },
     icon: Icons.delete_outline,
   );
+
+  Future<void> handleReward(ChildModel child, Currency curr) async{
+    if((child.increment[curr] ?? 0) > 0) {
+      SqfliteDB db = SqfliteDB();
+      DateTime today = DateTime.now().dateOnly();
+      double trans = await db.getCustomTransactionValue(child.name, today.subtract(Duration(days: 30)), curr, false);
+      //TODO:: else calculate the percentage of ( (decreasing - increasing) / (daily adding * 30) )
+      if(trans < 0){
+        double percentage = (-trans) / (child.increment[curr]! * 30);
+        if(percentage >= 0.1){
+          setReward(child, Reward.goodBeginning);
+        }
+        if(percentage >= 0.25){
+          setReward(child, Reward.strong);
+        }
+        if(percentage >= (1.0/3)){
+          setReward(child, Reward.star);
+        }
+        if(percentage >= 0.5){
+          setReward(child, Reward.shiny);
+        }
+        //TODO:: if the increasing >= decreasing then give the best reward of saving
+      } else {
+        setReward(child, Reward.goodBeginning);
+        setReward(child, Reward.strong);
+        setReward(child, Reward.star);
+        setReward(child, Reward.shiny);
+      }
+      //TODO:: calculate the percentage of ( (increasing) / (daily adding * 30) )
+      double increaseTrans = await db.getCustomTransactionValue(child.name, today.subtract(Duration(days: 30)), curr, true);
+      double percentage = increaseTrans / (child.increment[curr]! * 30);
+      if(percentage >= 0.5){
+        setReward(child, Reward.dreamer);
+      } else if(percentage >= 0.8){
+        setReward(child, Reward.ambitious);
+      } else if(percentage >= 1){
+        setReward(child, Reward.hero);
+      } else if(percentage >= 2){
+        setReward(child, Reward.legend);
+      }
+
+    }
+    if((child.expenses[curr] ?? 0) >= 100){
+      setReward(child, Reward.bronze);
+    }
+    if((child.expenses[curr] ?? 0) >= 1000){
+      setReward(child, Reward.silver);
+    }
+    if((child.expenses[curr] ?? 0) >= 10000){
+      setReward(child, Reward.golden);
+    }
+    if((child.expenses[curr] ?? 0) >= 100000){
+      setReward(child, Reward.diamond);
+    }
+    if((child.expenses[curr] ?? 0) >= 1000000){
+      setReward(child, Reward.master);
+    }
+
+    List<(ChildModel, Reward)> list = [];
+    for(Reward reward in Reward.values){
+      var childReward = child.rewards[reward];
+      if(childReward == null) continue;
+      if(/*childReward.$1 > 0 &&*/ childReward.$2 && !childReward.$3){
+        list.add((child, reward));
+      }
+    }
+    _showRewards(list, 0);
+  }
+
+  void setReward(ChildModel child, Reward reward){
+    if(child.rewards[reward] == null){
+      child.rewards[reward] = (0, true, false);
+    } else {
+      var it = child.rewards[reward]!;
+      child.rewards[reward] = (it.$1, true, it.$3);
+    }
+  }
 }

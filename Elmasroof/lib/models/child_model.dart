@@ -22,7 +22,7 @@ class ChildModel {
   DateTime? punishmentUntil;
 
   @HiveField(5)
-  Map<Reward, (double value, bool taken)> rewards;
+  Map<Reward, (double value, bool isTaken, bool isShowed)> rewards;
 
   ChildModel({
     required this.name,

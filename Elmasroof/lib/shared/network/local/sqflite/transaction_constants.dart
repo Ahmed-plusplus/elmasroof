@@ -8,5 +8,6 @@ class TransactionConstants {
   static const String DATE_ATTR = "date";
   static const String DESCRIPTION_ATTR = "description";
   static const String TOTAL_AMOUNT_ATTR = "totalAmount";
+  static const String TYPE_ATTR = "type";
 
 }

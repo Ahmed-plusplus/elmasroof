@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/enum/transaction_type.dart';
 import 'package:elmasroof/shared/network/local/sqflite/transaction_constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -10,7 +13,7 @@ class SqfliteDB {
 
   static Future<Database> createDB() async => _database = await openDatabase(
       join(await getDatabasesPath(), _DATABAS_NAME),
-      version: 3,
+      version: 4,
       onCreate: (database, version) async {
         try {
           await database.execute(_createOperationTable());
@@ -20,7 +23,7 @@ class SqfliteDB {
       },
       onOpen: (database) {},
       onUpgrade: (database, oldVersion, newVersion) async {
-        if(oldVersion <= 2){
+        if(oldVersion <= 3){
           try {
             await database.execute('DROP TABLE IF EXISTS ${TransactionConstants.TRANSACTION_TABLE}');
             await database.execute(_createOperationTable());
@@ -39,7 +42,8 @@ class SqfliteDB {
         '${TransactionConstants.AMOUNT_ATTR} REAL,'
         '${TransactionConstants.DATE_ATTR} INTEGER,'
         '${TransactionConstants.DESCRIPTION_ATTR} TEXT,'
-        '${TransactionConstants.TOTAL_AMOUNT_ATTR} REAL'
+        '${TransactionConstants.TOTAL_AMOUNT_ATTR} REAL,'
+        '${TransactionConstants.TYPE_ATTR} INTEGER'
         ')';
   }
 
@@ -47,7 +51,7 @@ class SqfliteDB {
     return await _database.rawQuery(query, args);
   }
 
-  Future<ChildExpensesChangingModel> insertChildData(ChildExpensesChangingModel child) async {
+  Future<ChildExpensesChangingModel> insertChildData(ChildExpensesChangingModel child, TransactionType type) async {
     child.id = await _database.transaction((txn) {
       return txn
           .rawInsert('INSERT INTO ${TransactionConstants.TRANSACTION_TABLE} ('
@@ -56,14 +60,16 @@ class SqfliteDB {
               '${TransactionConstants.AMOUNT_ATTR},'
               '${TransactionConstants.DATE_ATTR},'
               '${TransactionConstants.DESCRIPTION_ATTR},'
-              '${TransactionConstants.TOTAL_AMOUNT_ATTR}'
+              '${TransactionConstants.TOTAL_AMOUNT_ATTR},'
+              '${TransactionConstants.TYPE_ATTR}'
               ') VALUES ('
               '"${child.name}",'
               '"${child.expenses.$1.name}",'
               '${child.expenses.$2},'
               '${child.dateTime!.millisecondsSinceEpoch},'
               '"${child.description}",'
-              '${child.total.$2}'
+              '${child.total.$2},'
+              '${type.index}'
               ')');
     });
     return child;
@@ -86,6 +92,19 @@ class SqfliteDB {
           ),
         )
         .toList();
+  }
+
+  Future<double> getCustomTransactionValue(String name, DateTime from, Currency curr, bool increaseOnly) async{
+    var result = await getData(
+      'SELECT SUM(${TransactionConstants.AMOUNT_ATTR}) FROM "${TransactionConstants.TRANSACTION_TABLE}" WHERE '
+        '${TransactionConstants.DATE_ATTR} >= ? AND '
+        '${TransactionConstants.CURRENCY_ATTR} == ? AND '
+        '${TransactionConstants.NAME_ATTR} == ? AND '
+        '${(increaseOnly) ? '${TransactionConstants.AMOUNT_ATTR} > 0 AND ' : ''}'
+        '${TransactionConstants.TYPE_ATTR} == ${TransactionType.customTransaction.index}',
+      [from.millisecondsSinceEpoch, curr.name, name]
+    );
+    return result[0]['SUM(${TransactionConstants.AMOUNT_ATTR})'];
   }
 
   Future<int> updateDescription(int id, String description) async {

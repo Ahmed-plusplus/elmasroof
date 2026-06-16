@@ -2,6 +2,7 @@ import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/enum/transaction_type.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +30,7 @@ class HomeCubit extends Cubit<HomeStates> {
     selectedIndex = childrenNames.length - 1;
     stickerPath = ConstAssetImages.face1.path;
     addChildCurrency = Currency.pound;
-    emit(AddChildState());
+    emit(AddChildState(value));
   }
 
   void changeChild(int index){
@@ -49,7 +50,9 @@ class HomeCubit extends Cubit<HomeStates> {
             expenses: (currency, value),
             total: (currency, child.expenses[currency] ?? 0),
           ),
-        )
+          TransactionType.customTransaction,
+        ),
+        child
       )
     );
   }
