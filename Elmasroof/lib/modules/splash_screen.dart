@@ -1,5 +1,6 @@
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/models/reward_data_model.dart';
 import 'package:elmasroof/modules/create_password_screen.dart';
 import 'package:elmasroof/modules/enter_password_screen.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
@@ -186,10 +187,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void setReward(ChildModel child, Reward reward){
     if(child.rewards[reward] == null){
-      child.rewards[reward] = (0, true, false);
+      child.rewards[reward] = RewardDataModel(0, true, false);
     } else {
-      var it = child.rewards[reward]!;
-      child.rewards[reward] = (it.$1, true, it.$3);
+      child.rewards[reward]!.isTaken = true;
     }
   }
 

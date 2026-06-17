@@ -12,6 +12,7 @@ import 'package:elmasroof/layouts/alerts/reward_dialog.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
+import 'package:elmasroof/models/reward_data_model.dart';
 import 'package:elmasroof/modules/history_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
@@ -62,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       for(Reward reward in Reward.values){
         var childReward = childModel.rewards[reward];
         if(childReward == null) continue;
-        if(/*childReward.$1 > 0 &&*/ childReward.$2 && !childReward.$3){
+        if(/*childReward.$1 > 0 &&*/ childReward.isTaken && !childReward.isShowed){
           rewardList.add((childModel, reward));
         }
       }
@@ -71,21 +72,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showRewards(List<(ChildModel, Reward)> rewardList, int index){
-    if(rewardList.isNotEmpty){
+    if(rewardList.length > index){
       (ChildModel, Reward) item = rewardList[index];
       showRewardDialog(
         context: context,
         name: item.$1.name,
         reward: item.$2,
         onDismiss: () async{
-          var it = item.$1.rewards[item.$2]!;
-          item.$1.rewards[item.$2] = (it.$1, true, true);
-          item.$1.expenses[Currency.pound] = (item.$1.expenses[Currency.pound] ?? 0.0) + it.$1;
+          var it = item.$1.rewards[item.$2]!..isShowed = true;
+          item.$1.expenses[Currency.pound] = (item.$1.expenses[Currency.pound] ?? 0.0) + (it.value);
           SqfliteDB db = SqfliteDB();
           await db.insertChildData(
             ChildExpensesChangingModel(
               name: item.$1.name,
-              expenses: (Currency.pound, it.$1),
+              expenses: (Currency.pound, it.value),
               total: (Currency.pound, item.$1.expenses[Currency.pound] ?? 0.0),
               dateTime: DateTime.now(),
               description: 'مكافأة شارة ${item.$2.name}'
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         preferBelow: false,
                         child: SvgPicture.asset(
                           Reward.master.iconPath,
-                          colorFilter: (child!.rewards[Reward.master]?.$2 ?? false)
+                          colorFilter: (child!.rewards[Reward.master]?.isShowed ?? false)
                               ? null
                               : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
                         ),
@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 10,
                                     child: SvgPicture.asset(
                                       reward.iconPath,
-                                      colorFilter: (child.rewards[reward]?.$2 ?? false)
+                                      colorFilter: (child.rewards[reward]?.isShowed ?? false)
                                           ? null
                                           : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
                                     ),
@@ -619,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
     for(Reward reward in Reward.values){
       var childReward = child.rewards[reward];
       if(childReward == null) continue;
-      if(/*childReward.$1 > 0 &&*/ childReward.$2 && !childReward.$3){
+      if(/*childReward.$1 > 0 &&*/ childReward.isTaken && !childReward.isShowed){
         list.add((child, reward));
       }
     }
@@ -628,10 +628,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void setReward(ChildModel child, Reward reward){
     if(child.rewards[reward] == null){
-      child.rewards[reward] = (0, true, false);
+      child.rewards[reward] = RewardDataModel(0, true, false);
     } else {
-      var it = child.rewards[reward]!;
-      child.rewards[reward] = (it.$1, true, it.$3);
+      child.rewards[reward]!.isTaken = true;
     }
   }
 }
