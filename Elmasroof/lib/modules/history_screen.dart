@@ -64,14 +64,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     child: const Row(
       children: [
         SizedBox(width: 50,),
-        Expanded(
-          child: Text(
-            'التاريخ', style: TextStyle(fontWeight: FontWeight.bold,),
-          ),
-        ),
+        Expanded(child: Text('التاريخ', style: TextStyle(fontWeight: FontWeight.bold))),
         SizedBox(width: 50,),
-        Expanded(
-          child: Text(
+        Expanded(child: Text(
             'نوع العملة', textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold,),
           ),

@@ -9,10 +9,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth/local_auth.dart';
 
 class EnterPasswordScreen extends StatefulWidget {
-  EnterPasswordScreen({super.key, required this.isSupported, required this.availableBiometric});
+  const EnterPasswordScreen({super.key, required this.isSupported, required this.availableBiometric});
 
-  bool isSupported;
-  List<BiometricType> availableBiometric;
+  final bool isSupported;
+  final List<BiometricType> availableBiometric;
 
   @override
   State<EnterPasswordScreen> createState() => _EnterPasswordScreenState();
@@ -89,7 +89,11 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
   );
 
   Widget _handleBiometricButton() => BlocConsumer<AuthCubit, AuthStates>(
-    listener: (context, state) {},
+    listener: (context, state) {
+      if(state is AuthSuccessState){
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));
+      }
+    },
     builder: (context, state) {
       authCubit = AuthCubit.get(context);
       return (widget.isSupported
@@ -131,10 +135,6 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
   );
 
   void authBiometric() {
-    authCubit.authenticateWithBiometrics().then((authenticated) {
-      if(authenticated) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));
-      }
-    });
+    authCubit.authenticateWithBiometrics();
   }
 }

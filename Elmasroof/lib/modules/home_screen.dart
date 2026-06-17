@@ -57,18 +57,20 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     _cubit = HomeCubit.get(context);
-    List<(ChildModel, Reward)> rewardList = [];
-    for(String name in _cubit.childrenNames){
-      ChildModel childModel = _cubit.hiveStorage.get(name)!;
-      for(Reward reward in Reward.values){
-        var childReward = childModel.rewards[reward];
-        if(childReward == null) continue;
-        if(/*childReward.$1 > 0 &&*/ childReward.isTaken && !childReward.isShowed){
-          rewardList.add((childModel, reward));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      List<(ChildModel, Reward)> rewardList = [];
+      for(String name in _cubit.childrenNames){
+        ChildModel childModel = _cubit.hiveStorage.get(name)!;
+        for(Reward reward in Reward.values){
+          var childReward = childModel.rewards[reward];
+          if(childReward == null) continue;
+          if(/*childReward.$1 > 0 &&*/ childReward.isTaken && !childReward.isShowed){
+            rewardList.add((childModel, reward));
+          }
         }
       }
-    }
-    _showRewards(rewardList, 0);
+      _showRewards(rewardList, 0);
+    });
   }
 
   void _showRewards(List<(ChildModel, Reward)> rewardList, int index){
@@ -134,11 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     ),
     items: _cubit.childrenNames.map((name) {
-      return childrenCard(name, false);
-    }).toList() + [ childrenCard('إضافة\nإبن/بنت\n+', true), ],
+      return _childrenCard(name, false);
+    }).toList() + [ _childrenCard('إضافة\nإبن/بنت\n+', true), ],
   );
 
-  Widget childrenCard(String name, bool isAddCard) {
+  Widget _childrenCard(String name, bool isAddCard) {
     var child = _cubit.hiveStorage.get(name);
     return Card.outlined(
       color: isAddCard ? null : Colors.lightBlue,
@@ -151,124 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: EdgeInsets.all(24),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if(!isAddCard)
-              Column(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.lightBlue,
-                    child: IconButton(
-                      padding: const EdgeInsets.all(0),
-                      onPressed: () => showDetermineDailyExpensesAlert(context: context, child: child!),
-                      icon: SvgPicture.asset(ConstAssetImages.giveCoin.path),
-                    ),
-                  ),
-                  Spacer(),
-                  CircleAvatar(
-                    backgroundColor: Colors.redAccent,
-                    child: IconButton(
-                        onPressed: () => showPunishChildAlert(context: context, child: child!),
-                        icon: Icon(Icons.not_interested, color: Colors.white,)
-                    ),
-                  ),
-                ],
-              ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if(!isAddCard)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GestureDetector(
-                        onLongPress: () =>
-                            showChooseStickerAlert(
-                            context: context, onChoose: (index) =>
-                            _cubit.changeChildSticker(index)),
-                        child: Container(
-                          decoration: ShapeDecoration(shape: CircleBorder(
-                              side: BorderSide(color: Colors.white, width: 2)),
-                              color: Colors.white12),
-                          padding: const EdgeInsets.all(16.0),
-                          child: SvgPicture.asset(child!.stickerPath, fit: BoxFit.contain,
-                            width: 40,
-                            height: 40,),
-                        ),
-                      ),
-                    ),
-                  Text(
-                    name, textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold,),
-                  ),
-                ],
-              ),
-            ),
-            if(!isAddCard)
-              Expanded(
-                child: Column(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Tooltip(
-                        message: Reward.master.name,
-                        triggerMode: TooltipTriggerMode.longPress,
-                        waitDuration: const Duration(milliseconds: 500),
-                        showDuration: const Duration(seconds: 2),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        preferBelow: false,
-                        child: SvgPicture.asset(
-                          Reward.master.iconPath,
-                          colorFilter: (child!.rewards[Reward.master]?.isShowed ?? false)
-                              ? null
-                              : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 4.0),
-                        child: GridView.count(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 3.0,
-                          mainAxisSpacing: 2.0,
-                          children: Reward.values.map((reward) =>
-                              Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Tooltip(
-                                  message: reward.name,
-                                  triggerMode: TooltipTriggerMode.longPress,
-                                  waitDuration: const Duration(milliseconds: 500),
-                                  showDuration: const Duration(seconds: 2),
-                                  preferBelow: false,
-                                  child: SizedBox(
-                                    width: 10,
-                                    height: 10,
-                                    child: SvgPicture.asset(
-                                      reward.iconPath,
-                                      colorFilter: (child.rewards[reward]?.isShowed ?? false)
-                                          ? null
-                                          : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ).toList()..removeLast(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+        child: _createChildCardBody(child, name, isAddCard),
       ),
     );
   }
@@ -327,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
       nameController.text = '';
       initExpensesController.text = '0';
       showSuccessDialog(context: context, message: 'تمت الإضافة بنجاح',
-        onDismiss: () async => await handleReward(state.childModel, _cubit.addChildCurrency),);
+        onDismiss: () async => await _handleReward(state.childModel, _cubit.addChildCurrency),);
     } else if(state is RemoveChildState) {
       showSuccessDialog(context: context, message: 'تم الحذف بنجاح');
     } else if(state is AddToNameState) {
@@ -336,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onUpdateDescription: (id, description) => _cubit.updateDescriptionOfTransaction(id, description),
         child: state.child,
       );
-      await handleReward(state.childModel, _cubit.childCurrency);
+      await _handleReward(state.childModel, _cubit.childCurrency);
     }
   }
 
@@ -379,19 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
       inputType: TextInputType.number,
       formatter: DecimalFormatter(),
       submit: (value) => _addChild(context: context),
-      prefixWidget: InkWell(
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.black12,
-            child: SvgPicture.asset(_cubit.addChildCurrency.icon),
-          ),
-        ),
-        onTap: () => showChooseCurrencyAlert(
-          context: context,
-          onChoose: (currency) => _cubit.changeAddChildCurrency(currency),
-        ),
-      ),
+      prefixWidget: _createPrefixWidget(),
       validator: (String value){
         if(value.isEmpty) {
           return 'يجب إدخال المبلغ';
@@ -444,28 +317,9 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     child: Row(
       children: [
-        InkWell(
-          child: CircleAvatar(
-            child: SvgPicture.asset(_cubit.childCurrency.icon),
-            backgroundColor: Colors.black12,
-          ),
-          onTap: () => showChooseCurrencyAlert(
-            context: context,
-            onChoose: (currency) => _cubit.changeChildCurrency(currency),
-          ),
-        ),
+        _createCurrencyType(),
         Spacer(),
-        ValueListenableBuilder(
-            valueListenable: ListenOnValue.expensesNotifier,
-            builder: (context, value, child) {
-              return Text(
-                (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex])?.expenses[_cubit.childCurrency] ?? 0.0).toString(),
-                style: const TextStyle(
-                  fontSize: 18,
-                ),
-              );
-            }
-        ),
+        _createTotalAmountText(),
         Spacer(),
       ],
     ),
@@ -476,28 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required bool isPositive,
   }) => IconButton(
     padding: const EdgeInsets.all(4),
-    onPressed: () async {
-      if(_expensesChangeKey.currentState!.validate()) {
-        if(_expensesChangeController.text.isEmpty || _expensesChangeController.text == '0'){
-          _expensesChangeController.text = '0';
-          showDialog(context: context,
-              builder: (context) => AlertDialog(title: Text('أدخل الرقم أولاً'), icon: Icon(Icons.error_outline, color: Colors.black, size: 80,),)
-          );
-          return;
-        }
-        if(!PositiveFormatter().patternFormatter().hasMatch(_expensesChangeController.text)) {
-          showDialog(context: context,
-              builder: (context) => AlertDialog(title: Text('أدخل رقم صحيح'), icon: Icon(Icons.error_outline, color: Colors.black, size: 80,),)
-          );
-          return;
-        }
-        double value = double.parse(_expensesChangeController.text);
-        _expensesChangeController.text = '0';
-        await _audioPlayer.setVolume(0.2);
-        await _audioPlayer.play(AssetSource((isPositive) ? ConstAssetSounds.increaseMoney.path : ConstAssetSounds.decreaseMoney.path));
-        _cubit.addToName(_cubit.childCurrency, (isPositive) ? value : -value);
-      }
-    },
+    onPressed: () async => await _onChangeExpensesButton(isPositive),
     icon: CircleAvatar(
       backgroundColor: Colors.lightBlue,
       child: Icon(
@@ -558,62 +391,16 @@ class _HomeScreenState extends State<HomeScreen> {
     icon: Icons.delete_outline,
   );
 
-  Future<void> handleReward(ChildModel child, Currency curr) async{
+  Future<void> _handleReward(ChildModel child, Currency curr) async{
     if((child.increment[curr] ?? 0) > 0) {
       SqfliteDB db = SqfliteDB();
       DateTime today = DateTime.now().dateOnly();
       double trans = await db.getCustomTransactionValue(child.name, today.subtract(Duration(days: 30)), curr, false);
-      //TODO:: else calculate the percentage of ( (decreasing - increasing) / (daily adding * 30) )
-      if(trans < 0){
-        double percentage = (-trans) / (child.increment[curr]! * 30);
-        if(percentage >= 0.1){
-          setReward(child, Reward.goodBeginning);
-        }
-        if(percentage >= 0.25){
-          setReward(child, Reward.strong);
-        }
-        if(percentage >= (1.0/3)){
-          setReward(child, Reward.star);
-        }
-        if(percentage >= 0.5){
-          setReward(child, Reward.shiny);
-        }
-        //TODO:: if the increasing >= decreasing then give the best reward of saving
-      } else {
-        setReward(child, Reward.goodBeginning);
-        setReward(child, Reward.strong);
-        setReward(child, Reward.star);
-        setReward(child, Reward.shiny);
-      }
-      //TODO:: calculate the percentage of ( (increasing) / (daily adding * 30) )
+      _setReward1(child, curr, trans);
       double increaseTrans = await db.getCustomTransactionValue(child.name, today.subtract(Duration(days: 30)), curr, true);
-      double percentage = increaseTrans / (child.increment[curr]! * 30);
-      if(percentage >= 0.5){
-        setReward(child, Reward.dreamer);
-      } else if(percentage >= 0.8){
-        setReward(child, Reward.ambitious);
-      } else if(percentage >= 1){
-        setReward(child, Reward.hero);
-      } else if(percentage >= 2){
-        setReward(child, Reward.legend);
-      }
-
+      _setReward2(child, curr, increaseTrans);
     }
-    if((child.expenses[curr] ?? 0) >= 100){
-      setReward(child, Reward.bronze);
-    }
-    if((child.expenses[curr] ?? 0) >= 1000){
-      setReward(child, Reward.silver);
-    }
-    if((child.expenses[curr] ?? 0) >= 10000){
-      setReward(child, Reward.golden);
-    }
-    if((child.expenses[curr] ?? 0) >= 100000){
-      setReward(child, Reward.diamond);
-    }
-    if((child.expenses[curr] ?? 0) >= 1000000){
-      setReward(child, Reward.master);
-    }
+    _setReward3(child, curr);
 
     List<(ChildModel, Reward)> list = [];
     for(Reward reward in Reward.values){
@@ -626,11 +413,245 @@ class _HomeScreenState extends State<HomeScreen> {
     _showRewards(list, 0);
   }
 
-  void setReward(ChildModel child, Reward reward){
+  void _setReward(ChildModel child, Reward reward){
     if(child.rewards[reward] == null){
       child.rewards[reward] = RewardDataModel(0, true, false);
     } else {
       child.rewards[reward]!.isTaken = true;
     }
   }
+
+  Widget _createCurrencyType() => InkWell(
+    child: CircleAvatar(
+      backgroundColor: Colors.black12,
+      child: SvgPicture.asset(_cubit.childCurrency.icon),
+    ),
+    onTap: () => showChooseCurrencyAlert(
+      context: context,
+      onChoose: (currency) => _cubit.changeChildCurrency(currency),
+    ),
+  );
+
+  Widget _createTotalAmountText() => ValueListenableBuilder(
+      valueListenable: ListenOnValue.expensesNotifier,
+      builder: (context, value, child) {
+        return Text(
+          (hiveStorage.get(_cubit.childrenNames[_cubit.selectedIndex])?.expenses[_cubit.childCurrency] ?? 0.0).toString(),
+          style: const TextStyle(
+            fontSize: 18,
+          ),
+        );
+      }
+  );
+
+
+  Future<void> _onChangeExpensesButton(bool isPositive) async {
+    if(_expensesChangeKey.currentState!.validate()) {
+      if(_expensesChangeController.text.isEmpty || _expensesChangeController.text == '0'){
+        _expensesChangeController.text = '0';
+        showDialog(context: context,
+            builder: (context) => AlertDialog(title: Text('أدخل الرقم أولاً'), icon: Icon(Icons.error_outline, color: Colors.black, size: 80,),)
+        );
+        return;
+      }
+      if(!PositiveFormatter().patternFormatter().hasMatch(_expensesChangeController.text)) {
+        showDialog(context: context,
+            builder: (context) => AlertDialog(title: Text('أدخل رقم صحيح'), icon: Icon(Icons.error_outline, color: Colors.black, size: 80,),)
+        );
+        return;
+      }
+      double value = double.parse(_expensesChangeController.text);
+      _expensesChangeController.text = '0';
+      await _audioPlayer.setVolume(0.2);
+      await _audioPlayer.play(AssetSource((isPositive) ? ConstAssetSounds.increaseMoney.path : ConstAssetSounds.decreaseMoney.path));
+      _cubit.addToName(_cubit.childCurrency, (isPositive) ? value : -value);
+    }
+  }
+
+  void _setReward1(ChildModel child, Currency curr, double trans) {
+    //TODO:: else calculate the percentage of ( (decreasing - increasing) / (daily adding * 30) )
+    if(trans < 0){
+      double percentage = (-trans) / (child.increment[curr]! * 30);
+      if(percentage >= 0.1){
+        _setReward(child, Reward.goodBeginning);
+      }
+      if(percentage >= 0.25){
+        _setReward(child, Reward.strong);
+      }
+      if(percentage >= (1.0/3)){
+        _setReward(child, Reward.star);
+      }
+      if(percentage >= 0.5){
+        _setReward(child, Reward.shiny);
+      }
+      //TODO:: if the increasing >= decreasing then give the best reward of saving
+    } else {
+      _setReward(child, Reward.goodBeginning);
+      _setReward(child, Reward.strong);
+      _setReward(child, Reward.star);
+      _setReward(child, Reward.shiny);
+    }
+  }
+
+  void _setReward2(ChildModel child, Currency curr, double increaseTrans) {
+    //TODO:: calculate the percentage of ( (increasing) / (daily adding * 30) )
+    double percentage = increaseTrans / (child.increment[curr]! * 30);
+    if(percentage >= 0.5){
+      _setReward(child, Reward.dreamer);
+    } else if(percentage >= 0.8){
+      _setReward(child, Reward.ambitious);
+    } else if(percentage >= 1){
+      _setReward(child, Reward.hero);
+    } else if(percentage >= 2){
+      _setReward(child, Reward.legend);
+    }
+
+  }
+
+  void _setReward3(ChildModel child, Currency curr) {
+    if((child.expenses[curr] ?? 0) >= 100){
+      _setReward(child, Reward.bronze);
+    }
+    if((child.expenses[curr] ?? 0) >= 1000){
+      _setReward(child, Reward.silver);
+    }
+    if((child.expenses[curr] ?? 0) >= 10000){
+      _setReward(child, Reward.golden);
+    }
+    if((child.expenses[curr] ?? 0) >= 100000){
+      _setReward(child, Reward.diamond);
+    }
+    if((child.expenses[curr] ?? 0) >= 1000000){
+      _setReward(child, Reward.master);
+    }
+  }
+
+  Widget _createPrefixWidget() => InkWell(
+    child: Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: CircleAvatar(
+        backgroundColor: Colors.black12,
+        child: SvgPicture.asset(_cubit.addChildCurrency.icon),
+      ),
+    ),
+    onTap: () => showChooseCurrencyAlert(
+      context: context,
+      onChoose: (currency) => _cubit.changeAddChildCurrency(currency),
+    ),
+  );
+
+  Widget _createChildButtons(ChildModel child) => Column(
+    children: [
+      CircleAvatar(
+        backgroundColor: Colors.lightBlue,
+        child: IconButton(
+          padding: const EdgeInsets.all(0),
+          onPressed: () => showDetermineDailyExpensesAlert(context: context, child: child),
+          icon: SvgPicture.asset(ConstAssetImages.giveCoin.path),
+        ),
+      ),
+      Spacer(),
+      CircleAvatar(
+        backgroundColor: Colors.redAccent,
+        child: IconButton(
+            onPressed: () => showPunishChildAlert(context: context, child: child),
+            icon: Icon(Icons.not_interested, color: Colors.white,)
+        ),
+      ),
+    ],
+  );
+
+  Widget _createMiddleOfCard(String name, ChildModel? child, bool isAddCard,) => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      if(!isAddCard)
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onLongPress: () =>
+                showChooseStickerAlert(
+                    context: context, onChoose: (index) =>
+                    _cubit.changeChildSticker(index)),
+            child: Container(
+              decoration: ShapeDecoration(shape: CircleBorder(
+                  side: BorderSide(color: Colors.white, width: 2)),
+                  color: Colors.white12),
+              padding: const EdgeInsets.all(16.0),
+              child: SvgPicture.asset(child!.stickerPath, fit: BoxFit.contain,
+                width: 40,
+                height: 40,),
+            ),
+          ),
+        ),
+      Text(
+        name, textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 18, fontWeight: FontWeight.bold,),
+      ),
+    ],
+  );
+
+  Widget _createReward(Reward reward, ChildModel child, bool isMaster) => Tooltip(
+    message: reward.name,
+    triggerMode: TooltipTriggerMode.longPress,
+    waitDuration: const Duration(milliseconds: 500),
+    showDuration: const Duration(seconds: 2),
+    padding: (isMaster) ? const EdgeInsets.symmetric(
+      horizontal: 8,
+      vertical: 3,
+    ) : null,
+    preferBelow: false,
+    child: SizedBox(
+      width: (isMaster) ? null : 10,
+      height: (isMaster) ? null : 10,
+      child: SvgPicture.asset(
+        reward.iconPath,
+        colorFilter: (child.rewards[reward]?.isShowed ?? false)
+            ? null
+            : ColorFilter.mode(Colors.grey.withAlpha(200), BlendMode.srcIn),
+      ),
+    ),
+  );
+
+  Widget _createRewards(ChildModel child) => Column(
+    children: [
+      Expanded(
+        flex: 2,
+        child: _createReward(Reward.master, child, true),
+      ),
+      Expanded(
+        flex: 5,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 12.0, vertical: 4.0),
+          child: GridView.count(
+            crossAxisCount: 3,
+            crossAxisSpacing: 3.0,
+            mainAxisSpacing: 2.0,
+            children: Reward.values.map((reward) =>
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: _createReward(reward, child, false),
+                ),
+            ).toList()..removeLast(),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _createChildCardBody(ChildModel? child, String name, bool isAddCard) => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      if(!isAddCard)
+        _createChildButtons(child!),
+      Expanded(
+        child: _createMiddleOfCard(name, child, isAddCard),
+      ),
+      if(!isAddCard)
+        Expanded(
+          child: _createRewards(child!),
+        ),
+    ],
+  );
 }

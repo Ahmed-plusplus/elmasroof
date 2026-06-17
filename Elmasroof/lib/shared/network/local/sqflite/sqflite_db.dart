@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/enum/currency.dart';
 import 'package:elmasroof/shared/enum/transaction_type.dart';
@@ -23,13 +21,13 @@ class SqfliteDB {
       },
       onOpen: (database) {},
       onUpgrade: (database, oldVersion, newVersion) async {
-        if(oldVersion <= 3){
-          try {
-            await database.execute('DROP TABLE IF EXISTS ${TransactionConstants.TRANSACTION_TABLE}');
-            await database.execute(_createOperationTable());
-          } catch (e) {
-            print(e.toString());
+        try {
+          if(oldVersion <= 3){
+              await database.execute('DROP TABLE IF EXISTS ${TransactionConstants.TRANSACTION_TABLE}');
+              await database.execute(_createOperationTable());
           }
+        } catch (e) {
+          print(e.toString());
         }
       },
     );

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 Widget createTextField(
     {
       GlobalKey<FormFieldState>? formKey,
-      TextEditingController? controller,
+      required TextEditingController controller,
       String title = '',
       double titleSize = 15.0,
       Color titleColor = Colors.black87,
@@ -65,7 +65,7 @@ Widget createTextField(
             },
             child: TextFormField(
               key: formKey,
-              controller: controller,
+              controller: controller..selection = TextSelection.collapsed(offset: controller.text.length,),
               focusNode: node,
               textInputAction: action,
               keyboardType: inputType,

@@ -130,7 +130,12 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   );
 
   Widget _handleBiometricButton() => BlocConsumer<AuthCubit, AuthStates>(
-    listener: (context, state) {},
+    listener: (context, state) {
+      if(state is AuthSuccessState){
+        SharedManager.putData(key: SharedManager.LOGIN_BIOMETRIC, value: true);
+        _submit();
+      }
+    },
     builder: (context, state) {
       authCubit = AuthCubit.get(context);
       return (widget.isSupported //&& widget.availableBiometric.isNotEmpty
@@ -182,12 +187,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   );
 
   void authBiometric() {
-    authCubit.authenticateWithBiometrics().then((authenticated) {
-      if(authenticated) {
-        SharedManager.putData(key: SharedManager.LOGIN_BIOMETRIC, value: true);
-        _submit();
-      }
-    });
+    authCubit.authenticateWithBiometrics();
   }
 
   Widget _parentTypeWidget() => Padding(

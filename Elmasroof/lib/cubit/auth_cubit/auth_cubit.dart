@@ -24,17 +24,11 @@ class AuthCubit extends Cubit<AuthStates> {
     emit(AuthPasswordReadyState());
   }
 
-  Future<bool> authenticateWithBiometrics() async {
+  Future<void> authenticateWithBiometrics() async {
     var authenticated = false;
     try {
-      isAuthenticating = true;
-      emit(AuthStartedState());
-      authenticated = await auth.authenticate(
-        localizedReason:
-        'سجل الدخول ببصمتك',
-        persistAcrossBackgrounding: true,
-        biometricOnly: true,
-      );
+      startAuthenticating();
+      authenticated = await _showBiometricAuth();
       isAuthenticating = false;
     } on LocalAuthException catch (e) {
       print(e);
@@ -43,18 +37,14 @@ class AuthCubit extends Cubit<AuthStates> {
           e.code != LocalAuthExceptionCode.systemCanceled) {
         emit(AuthErrorState('Error - ${e.code.name}${e.description != null ? ': ${e.description}' : ''}'));
       }
-      return Future.value(false);
     } on PlatformException catch (e) {
       print(e);
       isAuthenticating = false;
       emit(AuthErrorState('Unexpected Error - ${e.message}'));
-      return Future.value(false);
     }
     if(authenticated) {
       emit(AuthSuccessState());
-      return Future.value(true);
     }
-    return Future.value(false);
   }
 
   void startAuthenticating() {
@@ -65,6 +55,15 @@ class AuthCubit extends Cubit<AuthStates> {
   void stopAuthenticating() {
     isAuthenticating = false;
     emit(AuthStartedState());
+  }
+
+  Future<bool> _showBiometricAuth() async{
+    return await auth.authenticate(
+      localizedReason:
+      'سجل الدخول ببصمتك',
+      persistAcrossBackgrounding: true,
+      biometricOnly: true,
+    );
   }
 
 }

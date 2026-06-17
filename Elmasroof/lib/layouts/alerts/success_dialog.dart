@@ -15,26 +15,7 @@ void showSuccessDialog({
   showGeneralDialog(
       context: context,
       pageBuilder: (context, animation, secondaryAnimation){
-        return Dialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          alignment: Alignment.center,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(ConstAssetImages.success.path, fit: BoxFit.contain, width: 80.0, height: 80.0,),
-                  const SizedBox(height: 16.0,),
-                  Text(message, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
-                ],
-              ),
-            ),
-          ),
-        );
+        return _createDialog(context, message);
       },
       barrierLabel: 'success dialog',
       barrierDismissible: false,
@@ -47,3 +28,24 @@ void showSuccessDialog({
       }}
   },);
 }
+
+Widget _createDialog(BuildContext context, String message) => Dialog(
+  backgroundColor: Colors.white,
+  surfaceTintColor: Colors.white,
+  alignment: Alignment.center,
+  insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+  child: BackdropFilter(
+    filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+    child: Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(ConstAssetImages.success.path, fit: BoxFit.contain, width: 80.0, height: 80.0,),
+          const SizedBox(height: 16.0,),
+          Text(message, style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
+        ],
+      ),
+    ),
+  ),
+);

@@ -7,67 +7,77 @@ import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:flutter/material.dart';
 
+TextEditingController daysController = TextEditingController();
+GlobalKey<FormFieldState> daysKey = GlobalKey();
+FocusNode daysNode = FocusNode();
+
 void showPunishChildAlert({
   required BuildContext context,
   required ChildModel child,
 }){
-  TextEditingController daysController = TextEditingController()..text = '0';
-  GlobalKey<FormFieldState> daysKey = GlobalKey();
-  FocusNode daysNode = FocusNode();
+  daysController.text = '0';
   showGeneralDialog(
       context: context,
       pageBuilder: (context, animation, secondaryAnimation){
-        return Dialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          alignment: Alignment.center,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  createTextField(
-                    title: 'مدة العقوبة (بالأيام)',
-                    hint: 'أدخل المدة',
-                    inputType: TextInputType.number,
-                    controller: daysController,
-                    formKey: daysKey,
-                    node: daysNode,
-                    formatter: PositiveFormatter(),
-                    validator: (String value){
-                      if(value.isEmpty) {
-                        return 'أدخل مدة العقوبة أولاً';
-                      }
-                      if(!PositiveFormatter().patternFormatter().hasMatch(value)){
-                        return 'أدخل رقم صحيح';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 8,),
-                  createButton(
-                    text: 'إضافة العقوبة',
-                    onPressed: () {
-                      if(daysKey.currentState!.validate()) {
-                        child.punishmentUntil = (child.punishmentUntil ?? DateTime.now().dateOnly())
-                            .add(Duration(days: int.parse(daysController.text)));
-                        HiveStorage hiveStorage = HiveStorage();
-                        hiveStorage.put(child.name, child);
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+        return _createDialog(context, child);
       },
       barrierLabel: 'determine punish duration child alert',
       barrierDismissible: true
   );
 }
+
+Widget _createDialog(BuildContext context, ChildModel child) => Dialog(
+  backgroundColor: Colors.white,
+  surfaceTintColor: Colors.white,
+  alignment: Alignment.center,
+  insetPadding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+  child: BackdropFilter(
+    filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: _createBody(context, child),
+    ),
+  ),
+);
+
+Widget _createBody(BuildContext context, ChildModel child) => Column(
+  mainAxisSize: MainAxisSize.min,
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    _createPunishmentTextField(),
+    const SizedBox(height: 8,),
+    _createPunishmentButton(context, child),
+  ],
+);
+
+Widget _createPunishmentTextField() => createTextField(
+  title: 'مدة العقوبة (بالأيام)',
+  hint: 'أدخل المدة',
+  inputType: TextInputType.number,
+  controller: daysController,
+  formKey: daysKey,
+  node: daysNode,
+  formatter: PositiveFormatter(),
+  validator: (String value){
+    if(value.isEmpty) {
+      return 'أدخل مدة العقوبة أولاً';
+    }
+    if(!PositiveFormatter().patternFormatter().hasMatch(value)){
+      return 'أدخل رقم صحيح';
+    }
+    return null;
+  },
+);
+
+Widget _createPunishmentButton(BuildContext context, ChildModel child) => createButton(
+  text: 'إضافة العقوبة',
+  onPressed: () {
+    if(daysKey.currentState!.validate()) {
+      child.punishmentUntil = (child.punishmentUntil ?? DateTime.now().dateOnly())
+          .add(Duration(days: int.parse(daysController.text)));
+      HiveStorage hiveStorage = HiveStorage();
+      hiveStorage.put(child.name, child);
+      Navigator.of(context).pop();
+    }
+  },
+);
