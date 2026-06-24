@@ -11,10 +11,11 @@ class HiveStorage {
   static late Box<ChildModel> _box;
 
   static Future<void> getInstance() async {
-    Hive.registerAdapter(ChildModelAdapter());
     Hive.registerAdapter(CurrencyAdapter());
     Hive.registerAdapter(RewardAdapter());
     Hive.registerAdapter(RewardDataModelAdapter());
+    Hive.registerAdapter(ChildModelAdapter());
+
     _box = await Hive.openBox<ChildModel>(ELMASROOF);
   }
 

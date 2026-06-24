@@ -498,11 +498,14 @@ class _HomeScreenState extends State<HomeScreen> {
     double percentage = increaseTrans / (child.increment[curr]! * 30);
     if(percentage >= 0.5){
       _setReward(child, Reward.dreamer);
-    } else if(percentage >= 0.8){
+    }
+    if(percentage >= 0.8){
       _setReward(child, Reward.ambitious);
-    } else if(percentage >= 1){
+    }
+    if(percentage >= 1){
       _setReward(child, Reward.hero);
-    } else if(percentage >= 2){
+    }
+    if(percentage >= 2){
       _setReward(child, Reward.legend);
     }
 
