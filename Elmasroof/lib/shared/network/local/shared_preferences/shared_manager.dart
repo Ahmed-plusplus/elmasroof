@@ -12,7 +12,7 @@ class SharedManager {
 
   static String getRewardId(Reward reward) => 'reward_${reward.id}';
 
-  static void init() async {
+  static init() async {
     _sharedPref = await SharedPreferences.getInstance();
   }
 
