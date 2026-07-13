@@ -170,7 +170,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _setReward(ChildModel child, Reward reward){
     if(child.rewards[reward] == null){
-      child.rewards[reward] = RewardDataModel(0, true, false);
+      child.rewards[reward] = RewardDataModel(
+          SharedManager.getData(key: SharedManager.getRewardId(reward)) ?? 0.0, true, false);
     } else {
       child.rewards[reward]!.isTaken = true;
     }

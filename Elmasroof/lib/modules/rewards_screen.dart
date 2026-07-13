@@ -30,7 +30,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
     rewards.sort((a, b) => a.id.compareTo(b.id));
     controllers = List.generate(rewards.length,
             (index) => TextEditingController()..text =
-                SharedManager.getData(key: SharedManager.getRewardId(rewards[index]))?.toString() ?? '0');
+                SharedManager.getData(key: SharedManager.getRewardId(rewards[index]))?.toString() ?? '0.0');
     keys = List.generate(rewards.length, (index) => GlobalKey());
   }
   @override

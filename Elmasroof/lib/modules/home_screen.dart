@@ -25,6 +25,7 @@ import 'package:elmasroof/shared/extensions/date_time_extension.dart';
 import 'package:elmasroof/shared/formatter/decimal_formatter.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
+import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -415,7 +416,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _setReward(ChildModel child, Reward reward){
     if(child.rewards[reward] == null){
-      child.rewards[reward] = RewardDataModel(0, true, false);
+      child.rewards[reward] = RewardDataModel(
+          SharedManager.getData(key: SharedManager.getRewardId(reward)) ?? 0.0, true, false);
     } else {
       child.rewards[reward]!.isTaken = true;
     }
