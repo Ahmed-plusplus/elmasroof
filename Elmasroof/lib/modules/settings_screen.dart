@@ -14,7 +14,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
 
   List<Widget> items = [];
-  ValueNotifier<String> _versionNotifier = ValueNotifier('');
+  final ValueNotifier<String> _versionNotifier = ValueNotifier('');
 
   @override
   void initState() {
