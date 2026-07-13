@@ -1,6 +1,6 @@
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
-import 'package:elmasroof/shared/enum/currency.dart';
-import 'package:elmasroof/shared/enum/transaction_type.dart';
+import 'package:elmasroof/shared/enums/currency.dart';
+import 'package:elmasroof/shared/enums/transaction_type.dart';
 import 'package:elmasroof/shared/network/local/sqflite/transaction_constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';

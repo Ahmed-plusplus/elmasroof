@@ -1,6 +1,6 @@
 import 'package:elmasroof/models/reward_data_model.dart';
-import 'package:elmasroof/shared/enum/reward.dart';
-import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/enums/reward.dart';
+import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:hive/hive.dart';
 
 part 'child_model.g.dart';

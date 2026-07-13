@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:elmasroof/shared/constants/const_asset_sounds.dart';
-import 'package:elmasroof/shared/enum/reward.dart';
+import 'package:elmasroof/shared/enums/reward.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

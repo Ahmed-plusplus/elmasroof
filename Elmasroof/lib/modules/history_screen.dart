@@ -4,7 +4,7 @@ import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
-import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

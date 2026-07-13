@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

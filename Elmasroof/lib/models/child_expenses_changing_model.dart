@@ -1,4 +1,4 @@
-import 'package:elmasroof/shared/enum/currency.dart';
+import 'package:elmasroof/shared/enums/currency.dart';
 
 class ChildExpensesChangingModel{
   int? id;

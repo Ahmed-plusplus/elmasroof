@@ -2,8 +2,9 @@ import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/auth_cubit/auth_states.dart';
 import 'package:elmasroof/layouts/custom_widget/radio_group/custom_radio_group.dart';
 import 'package:elmasroof/modules/home_screen.dart';
+import 'package:elmasroof/modules/rewards_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
-import 'package:elmasroof/shared/enum/parent_type.dart';
+import 'package:elmasroof/shared/enums/parent_type.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,7 +67,12 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   void _submit() {
     if(passwordKey.currentState!.validate() && confirmPasswordKey.currentState!.validate()){
       SharedManager.putData(key: SharedManager.LOGIN_PASSWORD, value: passwordController.text);
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder:
+          (context) => RewardsScreen(callback:
+              (context) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder:
+                  (context) => const HomeScreen()))
+          )
+      ));
     }
   }
 

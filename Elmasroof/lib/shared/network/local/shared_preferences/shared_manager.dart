@@ -1,3 +1,4 @@
+import 'package:elmasroof/shared/enums/reward.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedManager {
@@ -8,6 +9,8 @@ class SharedManager {
 
   static const String PARENT_TYPE = 'parentType';
   static const String LAST_DATE = 'lastDate';
+
+  static String getRewardId(Reward reward) => 'reward_${reward.id}';
 
   static init() async {
     _sharedPref = await SharedPreferences.getInstance();
