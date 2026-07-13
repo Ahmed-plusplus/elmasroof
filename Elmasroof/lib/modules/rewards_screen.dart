@@ -41,73 +41,68 @@ class _RewardsScreenState extends State<RewardsScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: List.generate(rewards.length, (index) {
-                  return Card.outlined(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      side: BorderSide(color: Colors.black87, width: 2,)
-                    ),
-                    margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: Row(
-                      children: [
-                        SizedBox(width: 8,),
-                        SvgPicture.asset(rewards[index].iconPath, width: 32, height: 32,),
-                        SizedBox(width: 4,),
-                        Expanded(
-                          child: createTextField(
-                            title: '${rewards[index].name} (${rewards[index].description})',
-                            controller: controllers[index],
-                            formKey: keys[index],
-                            inputType: TextInputType.number,
-                            formatter: PositiveFormatter(),
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'يجب إضافة القيمة أولاً';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  return _createCardItem(index);
                 },),
               ),
             ),
           ),
           SizedBox(height: 8,),
-          createButton(
-            text: 'تأكيد',
-            onPressed: () {
-              print('1');
-              bool valid = true;
-              for (var key in keys) {
-                print('11');
-                if(!key.currentState!.validate()){
-                  print('12');
-                  valid = false;
-                }
-              }
-              print('2');
-              if(!valid){
-                return;
-              }
-              // if(!_formKey.currentState!.validate()) {
-              //   return;
-              // }
-              print('3');
-              for(int i = 0; i < rewards.length; i++){
-                Reward reward = rewards[i];
-                TextEditingController controller = controllers[i];
-                SharedManager.putData(key: SharedManager.getRewardId(reward), value: double.parse(controller.text));
-              }
-              print('4');
-              widget.callback(context);
-            }
-          ),
+          _createConfirmButton(),
           SizedBox(height: 16,),
         ],
       ),
     );
   }
+
+  Widget _createCardItem(int index) => Card.outlined(
+    color: Colors.white,
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(color: Colors.black87, width: 2,)
+    ),
+    margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+    child: Row(
+      children: [
+        SizedBox(width: 8,),
+        SvgPicture.asset(rewards[index].iconPath, width: 32, height: 32,),
+        SizedBox(width: 4,),
+        Expanded(
+          child: createTextField(
+            title: '${rewards[index].name} (${rewards[index].description})',
+            controller: controllers[index],
+            formKey: keys[index],
+            inputType: TextInputType.number,
+            formatter: PositiveFormatter(),
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return 'يجب إضافة القيمة أولاً';
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _createConfirmButton() => createButton(
+      text: 'تأكيد',
+      onPressed: () {
+        bool valid = true;
+        for (var key in keys) {
+          if(!key.currentState!.validate()){
+            valid = false;
+          }
+        }
+        if(!valid){
+          return;
+        }
+        for(int i = 0; i < rewards.length; i++){
+          Reward reward = rewards[i];
+          TextEditingController controller = controllers[i];
+          SharedManager.putData(key: SharedManager.getRewardId(reward), value: double.parse(controller.text));
+        }
+        widget.callback(context);
+      }
+  );
 }
