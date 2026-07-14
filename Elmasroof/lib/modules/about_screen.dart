@@ -10,20 +10,22 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBarWidget(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('عن التطبيق', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),)
                 ],
               ),
-              SizedBox(height: 16,),
-              RichText(
-                textDirection: TextDirection.rtl,
+            ),
+            SizedBox(height: 8,),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: RichText(
                 text: TextSpan(
                   style: const TextStyle(
                     color: Colors.black,
@@ -95,8 +97,9 @@ class AboutScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            SizedBox(height: 16,),
+          ],
         ),
       ),
     );

@@ -49,23 +49,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBarWidget(),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.separated(
-              itemCount: items.length,
-              itemBuilder: (context, index) => items[index],
-              separatorBuilder: (context, index) => Container(width: 100, height: 1, color: Colors.grey,),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.separated(
+                itemCount: items.length,
+                itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: items[index],
+                ),
+                separatorBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  child: Container(height: 1, color: Colors.grey,),
+                ),
+              ),
             ),
-          ),
-          ValueListenableBuilder(
-            valueListenable: _versionNotifier,
-            builder: (context, value, child) {
-              return Text('Version $value');
-            }
-          ),
-          SizedBox(height: 8,),
-        ],
+            ValueListenableBuilder(
+              valueListenable: _versionNotifier,
+              builder: (context, value, child) {
+                return Text('Version $value');
+              }
+            ),
+            SizedBox(height: 8,),
+          ],
+        ),
       ),
     );
   }

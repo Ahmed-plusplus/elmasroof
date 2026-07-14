@@ -13,7 +13,7 @@ Widget createTextField(
       Color titleColor = Colors.black87,
       String hint = '',
       double textSize = 15.0,
-      TextAlign alignment = TextAlign.end,
+      TextAlign alignment = TextAlign.start,
       double? width,
       double? height,
       double? paddingHorizontal,
@@ -41,7 +41,7 @@ Widget createTextField(
   return Padding(
     padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: paddingHorizontal ?? 30.0),
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if(title.isNotEmpty)
           createTitle(
@@ -156,7 +156,6 @@ Widget createTitle({
         color: color,
         fontWeight: bold?FontWeight.bold:null,
       ),
-      textDirection: TextDirection.rtl,
     ),
   );
 }
@@ -196,15 +195,18 @@ Widget createButton({
 }
 
 AppBar appBarWidget({BuildContext? context}) => AppBar(
-  title: const Text('El masroof'),
+  title: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      const Text('El masroof'),
+    ],
+  ),
   elevation: 5,
-  actions: (context == null)?[]:[
-    IconButton(
+  leading: (context == null) ? null: IconButton(
       onPressed: () => Navigator.of(context).push(
         MaterialPageRoute(
             builder: (BuildContext context) => const SettingsScreen()),
       ),
       icon: const Icon(Icons.settings),
     ),
-  ],
 );

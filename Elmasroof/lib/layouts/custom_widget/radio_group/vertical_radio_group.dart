@@ -19,10 +19,10 @@ class VerticalRadioGroup<T> extends ElmasroofRadioGroup {
         return GestureDetector(
           onTap: () => cubit.onChangeRadio(index),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(list[index].toString(), textAlign: TextAlign.end,),
+              Text(list[index].toString(),),
               Radio<T>(
                 value: list[index],
                 groupValue: list[cubit.currentSelection],

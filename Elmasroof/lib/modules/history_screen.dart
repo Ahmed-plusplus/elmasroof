@@ -63,28 +63,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
     ),
     child: const Row(
       children: [
-        SizedBox(width: 50,),
-        Expanded(child: Text('التاريخ', style: TextStyle(fontWeight: FontWeight.bold))),
-        SizedBox(width: 50,),
-        Expanded(child: Text(
-            'نوع العملة', textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold,),
-          ),
-        ),
-        SizedBox(width: 5,),
-        Expanded(
-          child: Text(
-            'القيمة المتغيرة', textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold,),
-          ),
-        ),
-        SizedBox(width: 15,),
         Expanded(
           child: Text(
             'الإجمالى', textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold,),
           ),
         ),
+        SizedBox(width: 15,),
+        Expanded(
+          child: Text(
+            'القيمة المتغيرة', textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold,),
+          ),
+        ),
+        SizedBox(width: 5,),
+        Expanded(child: Text(
+            'نوع العملة', textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold,),
+          ),
+        ),
+        SizedBox(width: 60,),
+        Expanded(child: Text('التاريخ', style: TextStyle(fontWeight: FontWeight.bold))),
+        SizedBox(width: 40,),
       ],
     ),
   );
@@ -178,20 +178,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
     margin: const EdgeInsets.only(top: 8.0),
     padding: const EdgeInsets.symmetric(horizontal: 8.0),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(
-          description,
-          textAlign: TextAlign.end,
-        ),
         const Text(
           'التفاصيل: ',
           textAlign: TextAlign.start,
-          textDirection: TextDirection.rtl,
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
+        Text(description,),
       ],
     ),
   );
@@ -204,15 +199,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
     required double total,
   }) => Row(
     children: [
-      Text(date, style: const TextStyle(fontWeight: FontWeight.bold),),
-      const SizedBox(width: 5,),
-      Text(time, style: const TextStyle(fontSize: 12),),
-      const SizedBox(width: 35,),
-      SvgPicture.asset(currency.icon, width: 22, height: 22,),
-      const SizedBox(width: 25,),
-      Expanded(child: _changeValueText(value)),
-      const SizedBox(width: 7,),
       Expanded(child: _totalText(total),),
+      const SizedBox(width: 15,),
+      Expanded(child: _changeValueText(value)),
+      const SizedBox(width: 15,),
+      SvgPicture.asset(currency.icon, width: 22, height: 22,),
+      const SizedBox(width: 35,),
+      Text(time, style: const TextStyle(fontSize: 12),),
+      const SizedBox(width: 5,),
+      Text(date, style: const TextStyle(fontWeight: FontWeight.bold),),
     ],
   );
 

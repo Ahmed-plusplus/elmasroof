@@ -291,16 +291,16 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: 60,),
-          createTitle(title: 'المبلغ الحالى', titleSize: 18, color: Colors.white),
+          createTitle(title: 'المبلغ الحالى     ', titleSize: 18, color: Colors.white),
           _createExpensesText(),
           const SizedBox(height: 30,),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _decreaseButton(),
-              _changedValueText(),
               _increaseButton(),
+              _changedValueText(),
+              _decreaseButton(),
             ],
           ),
         ],
@@ -318,10 +318,9 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     child: Row(
       children: [
+        SizedBox(width: 8,),
+        Expanded(child: Center(child: _createTotalAmountText())),
         _createCurrencyType(),
-        Spacer(),
-        _createTotalAmountText(),
-        Spacer(),
       ],
     ),
   );

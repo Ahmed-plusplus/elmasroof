@@ -36,6 +36,12 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Elmasroof',
         debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: child!,
+          );
+        },
         theme: ThemeData(
 
         ),

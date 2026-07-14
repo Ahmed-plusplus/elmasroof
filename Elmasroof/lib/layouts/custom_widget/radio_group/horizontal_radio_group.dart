@@ -16,39 +16,36 @@ class HorizontalRadioGroup<T> extends ElmasroofRadioGroup<T> {
     return Container(
       height: 20,
       padding: EdgeInsets.only(right: 20.0),
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () => cubit.onChangeRadio(index),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Radio<T>(
-                    value: list[index],
-                    groupValue: list[cubit.currentSelection],
-                    onChanged: (value) {
-                      callBack(value);
-                      cubit.onChangeRadio(index);
-                    },
-                    visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                        vertical: VisualDensity.minimumDensity),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  Text(list[index].toString(), textAlign: TextAlign.end,),
-                ],
-              ),
-            );
-          },
-          separatorBuilder: (context, index) => SizedBox(width: 20,),
-          shrinkWrap: true,
-          itemCount: list.length,
-        ),
+      child: ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () => cubit.onChangeRadio(index),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio<T>(
+                  value: list[index],
+                  groupValue: list[cubit.currentSelection],
+                  onChanged: (value) {
+                    callBack(value);
+                    cubit.onChangeRadio(index);
+                  },
+                  visualDensity: const VisualDensity(
+                      horizontal: VisualDensity.minimumDensity,
+                      vertical: VisualDensity.minimumDensity),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                Text(list[index].toString(),),
+              ],
+            ),
+          );
+        },
+        separatorBuilder: (context, index) => SizedBox(width: 20,),
+        shrinkWrap: true,
+        itemCount: list.length,
       ),
     );
   }
