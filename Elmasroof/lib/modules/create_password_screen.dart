@@ -3,6 +3,7 @@ import 'package:elmasroof/cubit/auth_cubit/auth_states.dart';
 import 'package:elmasroof/layouts/custom_widget/radio_group/custom_radio_group.dart';
 import 'package:elmasroof/modules/home_screen.dart';
 import 'package:elmasroof/modules/rewards_screen.dart';
+import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/enums/parent_type.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
@@ -11,10 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth/local_auth.dart';
 
 class CreatePasswordScreen extends StatefulWidget {
-  CreatePasswordScreen({super.key, required this.isSupported, required this.availableBiometric});
 
-  bool isSupported;
-  List<BiometricType> availableBiometric;
+  const CreatePasswordScreen({super.key,});
 
   @override
   State<CreatePasswordScreen> createState() => _CreatePasswordScreenState();
@@ -144,7 +143,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     },
     builder: (context, state) {
       authCubit = AuthCubit.get(context);
-      return (widget.isSupported //&& widget.availableBiometric.isNotEmpty
+      return (BiometricAvailability.instance.isSupported //&& widget.availableBiometric.isNotEmpty
           && authCubit.isPasswordReady) ?
       _biometricButton()
           : Container();

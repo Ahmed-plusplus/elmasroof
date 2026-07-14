@@ -3,6 +3,7 @@ import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/reward_data_model.dart';
 import 'package:elmasroof/modules/create_password_screen.dart';
 import 'package:elmasroof/modules/enter_password_screen.dart';
+import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
 import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:elmasroof/shared/enums/reward.dart';
@@ -23,8 +24,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  bool _isSupported = false;
-  List<BiometricType> _availableBiometric = [];
+
+  BiometricAvailability availability = BiometricAvailability.instance;
 
   @override
   void initState() {
@@ -39,10 +40,10 @@ class _SplashScreenState extends State<SplashScreen> {
               auth.getAvailableBiometrics(),
               _handleIncrementalExpenses(),
             ]).then((list) {
-              _isSupported = list[0] as bool;
-              _availableBiometric = list[1] as List<BiometricType>;
-              print('is supported: $_isSupported');
-              print('available: $_availableBiometric');
+              availability.isSupported = list[0] as bool;
+              availability.availableBiometric = list[1] as List<BiometricType>;
+              print('is supported: ${availability.isSupported}');
+              print('available: ${availability.availableBiometric}');
               _navigateScreen();
             }));
   }
@@ -67,12 +68,8 @@ class _SplashScreenState extends State<SplashScreen> {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) =>
           (SharedManager.getData(key: SharedManager.LOGIN_PASSWORD) == null)
-              ? CreatePasswordScreen(
-                  isSupported: _isSupported,
-                  availableBiometric: _availableBiometric)
-              : EnterPasswordScreen(
-                  isSupported: _isSupported,
-                  availableBiometric: _availableBiometric),
+              ? const CreatePasswordScreen()
+              : const EnterPasswordScreen(),
     ));
   }
 

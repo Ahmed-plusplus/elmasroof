@@ -1,6 +1,7 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/auth_cubit/auth_states.dart';
 import 'package:elmasroof/modules/home_screen.dart';
+import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
@@ -9,10 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth/local_auth.dart';
 
 class EnterPasswordScreen extends StatefulWidget {
-  const EnterPasswordScreen({super.key, required this.isSupported, required this.availableBiometric});
 
-  final bool isSupported;
-  final List<BiometricType> availableBiometric;
+  const EnterPasswordScreen({super.key,});
 
   @override
   State<EnterPasswordScreen> createState() => _EnterPasswordScreenState();
@@ -25,13 +24,14 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
   FocusNode passwordNode = FocusNode();
 
   late AuthCubit authCubit;
+  final BiometricAvailability _availability = BiometricAvailability.instance;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     authCubit = AuthCubit.get(context);
-    if (widget.isSupported
+    if (_availability.isSupported
         && (SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false)) {
       authBiometric();
     }
@@ -96,7 +96,7 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
     },
     builder: (context, state) {
       authCubit = AuthCubit.get(context);
-      return (widget.isSupported
+      return (_availability.isSupported
           && (SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false))
           ? _biometricButton() : Container();
     },

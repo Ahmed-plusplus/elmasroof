@@ -1,5 +1,8 @@
+import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
+import 'package:elmasroof/modules/about_screen.dart';
 import 'package:elmasroof/modules/forget_password_screen.dart';
 import 'package:elmasroof/modules/rewards_screen.dart';
+import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -15,6 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   List<Widget> items = [];
   final ValueNotifier<String> _versionNotifier = ValueNotifier('');
+  late AuthCubit _authCubit;
 
   @override
   void initState() {
@@ -29,10 +33,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       print(e.toString());
     });
 
+    _authCubit = AuthCubit.get(context);
+
     items = [
       _changeRewardsValue(),
       _changePassword(),
-      _activateBiometerAuth(),
+      if(BiometricAvailability.instance.isSupported)
+        _activateBiometerAuth(),
+      _linkAppWithGmail(),
       _aboutApp()
     ];
   }
@@ -45,9 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Expanded(
             child: ListView.separated(
-              itemCount: 4,
+              itemCount: items.length,
               itemBuilder: (context, index) => items[index],
-              separatorBuilder: (context, index) => Container(height: 1, color: Colors.grey,),
+              separatorBuilder: (context, index) => Container(width: 100, height: 1, color: Colors.grey,),
             ),
           ),
           ValueListenableBuilder(
@@ -83,5 +91,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _activateBiometerAuth() => Container(child: Text('تفعيل البصمة'),);
 
-  Widget _aboutApp() => Container(child: Text('عن التطبيق'),);
+  Widget _aboutApp() => GestureDetector(
+    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AboutScreen())),
+    child: Row(children: [ Text('عن التطبيق', style: TextStyle(fontSize: 28),), ],),
+  );
+
+  Widget _linkAppWithGmail() => GestureDetector(
+    child: Row(
+      children: [
+        Text('ربط التطبيق بحساب جوجل', style: TextStyle(fontSize: 28),),
+      ],
+    ),
+  );
 }
