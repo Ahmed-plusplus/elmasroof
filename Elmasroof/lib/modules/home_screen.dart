@@ -265,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
       inputType: TextInputType.number,
       formatter: DecimalFormatter(),
       submit: (value) => _addChild(context: context),
-      prefixWidget: _createPrefixWidget(),
+      suffixWidget: _createSuffixWidget(),
       validator: (String value){
         if(value.isEmpty) {
           return 'يجب إدخال المبلغ';
@@ -530,7 +530,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _createPrefixWidget() => InkWell(
+  Widget _createSuffixWidget() => InkWell(
     child: Padding(
       padding: const EdgeInsets.all(4.0),
       child: CircleAvatar(

@@ -75,7 +75,7 @@ Widget _createExpensesTextField(DailyExpensesCubit cubit) => createTextField(
     node: expensesNode,
     inputType: TextInputType.number,
     formatter: PositiveFormatter(),
-    prefixWidget: _createPrefixWidget(cubit),
+    suffixWidget: _createSuffixWidget(cubit),
     validator: (String value){
       if(value.isEmpty) {
         return 'يجب إدخال المبلغ';
@@ -87,7 +87,7 @@ Widget _createExpensesTextField(DailyExpensesCubit cubit) => createTextField(
     }
 );
 
-Widget _createPrefixWidget(DailyExpensesCubit cubit) => BlocConsumer<DailyExpensesCubit, DailyExpensesState>(
+Widget _createSuffixWidget(DailyExpensesCubit cubit) => BlocConsumer<DailyExpensesCubit, DailyExpensesState>(
     listener: (context, state) {},
     builder: (context, state) {
       cubit = DailyExpensesCubit.get(context);

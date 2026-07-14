@@ -7,6 +7,7 @@ import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/splash_screen.dart';
 import 'package:elmasroof/shared/bloc_observer.dart';
 import 'package:elmasroof/shared/components/value_listenable.dart';
+import 'package:elmasroof/shared/app_device_info.dart';
 import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
@@ -57,4 +58,5 @@ Future<void> init() async{
   await SqfliteDB.createDB();
   Bloc.observer = MyBlocObserver();
   await SharedManager.init();
+  await AppDeviceInfo.init();
 }

@@ -49,6 +49,10 @@ dependencies:
   carousel_slider: ^5.1.2
   audioplayers: ^6.7.1
   package_info_plus: ^10.2.0
+  device_info_plus: ^13.2.0
+  android_id: ^0.5.2+1
+  pretty_qr_code: ^3.6.0
+  svg_image_provider: ^0.1.2
 
   path: any
 dev_dependencies:

@@ -4,8 +4,12 @@ import 'package:elmasroof/modules/forget_password_screen.dart';
 import 'package:elmasroof/modules/rewards_screen.dart';
 import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
+import 'package:elmasroof/shared/constants/const_asset_images.dart';
+import 'package:elmasroof/shared/app_device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
+import 'package:svg_image_provider/svg_image_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -17,21 +21,12 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
 
   List<Widget> items = [];
-  final ValueNotifier<String> _versionNotifier = ValueNotifier('');
   late AuthCubit _authCubit;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    PackageInfo.fromPlatform().then(
-        (packageInfo){
-          _versionNotifier.value = packageInfo.version;
-        }
-    ).catchError((e) {
-      print(e.toString());
-    });
 
     _authCubit = AuthCubit.get(context);
 
@@ -66,12 +61,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
-            ValueListenableBuilder(
-              valueListenable: _versionNotifier,
-              builder: (context, value, child) {
-                return Text('Version $value');
-              }
+            Expanded(
+              child: Center(
+                child: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: PrettyQrView.data(
+                    data: AppDeviceInfo.id,
+                    decoration: PrettyQrDecoration(
+                      shape: const PrettyQrSmoothSymbol(
+                        color: Colors.lightBlue,
+                      ),
+                      image: PrettyQrDecorationImage(
+                        image: SvgImageProvider(
+                          ConstAssetImages.expenses.path,
+                        ),
+                      ),
+                      background: Colors.transparent,
+                      quietZone: PrettyQrQuietZone.zero,
+                    ),
+                    errorCorrectLevel: QrErrorCorrectLevel.H
+                  ),
+                ),
+              ),
             ),
+            Text('Version ${AppDeviceInfo.versionName}'),
             SizedBox(height: 8,),
           ],
         ),

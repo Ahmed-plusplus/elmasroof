@@ -6,6 +6,7 @@ enum ConstAssetImages {
   richChildren('assets/images/rich_children.jpeg'),
   success('assets/images/success.svg'),
   giveCoin('assets/images/give_coin.svg'),
+  expenses('assets/images/expenses_icon.svg'),
   face1('assets/images/face_1.svg'),
   face2('assets/images/face_2.svg'),
   face3('assets/images/face_3.svg'),

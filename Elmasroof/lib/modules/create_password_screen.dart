@@ -81,6 +81,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       formKey: passwordKey,
       controller: passwordController,
       node: passwordNode,
+      hideText: true,
       action: TextInputAction.next,
       submit: (value){
         if(passwordKey.currentState!.validate()) {
@@ -112,6 +113,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       formKey: confirmPasswordKey,
       controller: confirmPasswordController,
       node: confirmPasswordNode,
+      hideText: true,
       validator: (String value){
         if(value.isEmpty) {
           return 'أكد كلمة المرور أولاً';

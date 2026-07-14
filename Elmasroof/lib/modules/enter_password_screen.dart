@@ -76,6 +76,7 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
       formKey: passwordKey,
       controller: passwordController,
       node: passwordNode,
+      hideText: true,
       submit: (value) => _submit(),
       validator: (String value){
         if(value.isEmpty) {
