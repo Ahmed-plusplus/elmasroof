@@ -6,6 +6,7 @@ import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/app_device_info.dart';
+import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -35,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _changePassword(),
       if(BiometricAvailability.instance.isSupported)
         _activateBiometerAuth(),
-      _linkAppWithGmail(),
+      // _linkAppWithGmail(),
       _aboutApp()
     ];
   }
@@ -61,30 +62,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
-            Expanded(
-              child: Center(
-                child: SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: PrettyQrView.data(
-                    data: AppDeviceInfo.id,
-                    decoration: PrettyQrDecoration(
-                      shape: const PrettyQrSmoothSymbol(
-                        color: Colors.lightBlue,
-                      ),
-                      image: PrettyQrDecorationImage(
-                        image: SvgImageProvider(
-                          ConstAssetImages.expenses.path,
-                        ),
-                      ),
-                      background: Colors.transparent,
-                      quietZone: PrettyQrQuietZone.zero,
-                    ),
-                    errorCorrectLevel: QrErrorCorrectLevel.H
-                  ),
-                ),
-              ),
-            ),
+            // Expanded(
+            //   child: Center(
+            //     child: SizedBox(
+            //       width: 150,
+            //       height: 150,
+            //       child: PrettyQrView.data(
+            //         data: AppDeviceInfo.id,
+            //         decoration: PrettyQrDecoration(
+            //           shape: const PrettyQrSmoothSymbol(
+            //             color: Colors.lightBlue,
+            //           ),
+            //           image: PrettyQrDecorationImage(
+            //             image: SvgImageProvider(
+            //               ConstAssetImages.expenses.path,
+            //             ),
+            //           ),
+            //           background: Colors.transparent,
+            //           quietZone: PrettyQrQuietZone.zero,
+            //         ),
+            //         errorCorrectLevel: QrErrorCorrectLevel.H
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Text('Version ${AppDeviceInfo.versionName}'),
             SizedBox(height: 8,),
           ],
@@ -93,23 +94,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _changeRewardsValue() => createButton(
-    text: 'تعديل قيم الجوائز',
-    onPressed: () => Navigator.of(context).push(
+  Widget _changeRewardsValue() => GestureDetector(
+    onTap: () => Navigator.of(context).push(
       MaterialPageRoute(
           builder: (BuildContext context) =>
               RewardsScreen(callback: (context) => Navigator.of(context).pop())
       ),
     ),
+    child: Row(children: [ Text('تعديل قيم الجوائز', style: TextStyle(fontSize: 28),), ],),
   );
 
-  Widget _changePassword()  => createButton(
-    text: 'تغيير كلمة المرور',
-    onPressed: () => Navigator.of(context).push(
-      MaterialPageRoute(
-          builder: (BuildContext context) => ForgetPasswordScreen()
-      ),
-    ),
+  Widget _changePassword()  => GestureDetector(
+    onTap: () async {
+      if(SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false) {
+        if(await _authCubit.authenticateWithBiometrics()){
+          Navigator.of(context).push(
+            MaterialPageRoute(
+                builder: (BuildContext context) => ForgetPasswordScreen()
+            ),
+          );
+        }
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (BuildContext context) => ForgetPasswordScreen()
+          ),
+        );
+      }
+    },
+    child: Row(children: [ Text('تغيير كلمة المرور', style: TextStyle(fontSize: 28),), ],),
   );
 
   Widget _activateBiometerAuth() => Container(child: Text('تفعيل البصمة'),);

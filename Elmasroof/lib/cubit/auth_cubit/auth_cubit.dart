@@ -10,7 +10,7 @@ class AuthCubit extends Cubit<AuthStates> {
   static AuthCubit get(context) => BlocProvider.of(context);
 
   bool isPasswordReady = false;
-  bool isAuthenticating = false;
+  bool _isAuthenticating = false;
 
   LocalAuthentication auth = LocalAuthentication();
 
@@ -24,36 +24,37 @@ class AuthCubit extends Cubit<AuthStates> {
     emit(AuthPasswordReadyState());
   }
 
-  Future<void> authenticateWithBiometrics() async {
+  Future<bool> authenticateWithBiometrics() async {
     var authenticated = false;
     try {
       startAuthenticating();
       authenticated = await _showBiometricAuth();
-      isAuthenticating = false;
+      _isAuthenticating = false;
     } on LocalAuthException catch (e) {
       print(e);
-      isAuthenticating = false;
+      _isAuthenticating = false;
       if (e.code != LocalAuthExceptionCode.userCanceled &&
           e.code != LocalAuthExceptionCode.systemCanceled) {
         emit(AuthErrorState('Error - ${e.code.name}${e.description != null ? ': ${e.description}' : ''}'));
       }
     } on PlatformException catch (e) {
       print(e);
-      isAuthenticating = false;
+      _isAuthenticating = false;
       emit(AuthErrorState('Unexpected Error - ${e.message}'));
     }
     if(authenticated) {
       emit(AuthSuccessState());
     }
+    return authenticated;
   }
 
   void startAuthenticating() {
-    isAuthenticating = true;
+    _isAuthenticating = true;
     emit(AuthStartedState());
   }
 
   void stopAuthenticating() {
-    isAuthenticating = false;
+    _isAuthenticating = false;
     emit(AuthStartedState());
   }
 

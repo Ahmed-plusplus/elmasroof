@@ -10,6 +10,8 @@ class SharedManager {
   static const String PARENT_TYPE = 'parentType';
   static const String LAST_DATE = 'lastDate';
 
+  SharedManager._();
+
   static String getRewardId(Reward reward) => 'reward_${reward.id}';
 
   static Future<void> init() async {
