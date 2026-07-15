@@ -8,9 +8,6 @@ import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/app_device_info.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pretty_qr_code/pretty_qr_code.dart';
-import 'package:svg_image_provider/svg_image_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -23,6 +20,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   List<Widget> items = [];
   late AuthCubit _authCubit;
+  final ValueNotifier<bool> _isBiometricEnabled =
+    ValueNotifier(SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false);
 
   @override
   void initState() {
@@ -101,7 +100,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               RewardsScreen(callback: (context) => Navigator.of(context).pop())
       ),
     ),
-    child: Row(children: [ Text('تعديل قيم الجوائز', style: TextStyle(fontSize: 28),), ],),
+    child: Row(
+      children: [
+        Icon(Icons.workspace_premium_outlined, color: Colors.grey,),
+        SizedBox(width: 8,),
+        Text('تعديل قيم الجوائز', style: TextStyle(fontSize: 28),),
+      ],
+    ),
   );
 
   Widget _changePassword()  => GestureDetector(
@@ -122,14 +127,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     },
-    child: Row(children: [ Text('تغيير كلمة المرور', style: TextStyle(fontSize: 28),), ],),
+    child: Row(
+      children: [
+        Icon(Icons.vpn_key, color: Colors.grey,),
+        SizedBox(width: 8,),
+        Text('تغيير كلمة المرور', style: TextStyle(fontSize: 28),),
+      ],
+    ),
   );
 
-  Widget _activateBiometerAuth() => Container(child: Text('تفعيل البصمة'),);
+  Widget _activateBiometerAuth() => Row(
+    children: [
+      Icon(Icons.fingerprint, color: Colors.grey,),
+      SizedBox(width: 8,),
+      Text('تفعيل البصمة', style: TextStyle(fontSize: 26),),
+      Spacer(),
+      ValueListenableBuilder(
+        valueListenable: _isBiometricEnabled,
+        builder: (context, value, child) {
+          return Switch(
+            value: value,
+            activeTrackColor: Colors.lightBlue,
+            onChanged: (val) async {
+              print(val);
+              if(val){
+                if(await _authCubit.authenticateWithBiometrics()){
+                  SharedManager.putData(key: SharedManager.LOGIN_BIOMETRIC, value: true);
+                  _isBiometricEnabled.value = true;
+                }
+              } else {
+                SharedManager.putData(key: SharedManager.LOGIN_BIOMETRIC, value: false);
+                _isBiometricEnabled.value = false;
+              }
+            }
+          );
+        }
+      ),
+      Spacer(),
+      Spacer(),
+      Spacer(),
+      Spacer(),
+    ],
+  );
 
   Widget _aboutApp() => GestureDetector(
     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AboutScreen())),
-    child: Row(children: [ Text('عن التطبيق', style: TextStyle(fontSize: 28),), ],),
+    child: Row(
+      children: [
+        Icon(Icons.info, color: Colors.grey,),
+        SizedBox(width: 8,),
+        Text('عن التطبيق', style: TextStyle(fontSize: 28),),
+      ],
+    ),
   );
 
   Widget _linkAppWithGmail() => GestureDetector(
