@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_states.dart';
+import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_currency_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_sticker_alert.dart';
@@ -40,6 +41,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
   final TextEditingController _expensesChangeController = TextEditingController()
     ..text = '0';
   final GlobalKey<FormFieldState> _expensesChangeKey = GlobalKey();
@@ -52,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late HiveStorage hiveStorage = HiveStorage();
   late HomeCubit _cubit;
   final _audioPlayer = AudioPlayer();
+  InterstitialAdScreen interstitialAdScreen = InterstitialAdScreen();
 
   @override
   void initState() {
@@ -71,7 +74,15 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
       _showRewards(rewardList, 0);
+      interstitialAdScreen.start();
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    interstitialAdScreen.dispose();
+    super.dispose();
   }
 
   void _showRewards(List<(ChildModel, Reward)> rewardList, int index){
@@ -172,9 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _createSavingsField(),
         createButton(
           text: 'إضافة',
-          onPressed: () => _addChild(
-            context: context,
-          ),
+          onPressed: () => interstitialAdScreen.start(() => _addChild(context: context,)),
           icon: Icons.add,
         ),
       ],
@@ -221,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         onUpdateDescription: (id, description) => _cubit.updateDescriptionOfTransaction(id, description),
         child: state.child,
+        adScreen: interstitialAdScreen,
       );
       await _handleReward(state.childModel, _cubit.childCurrency);
     }
@@ -264,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
       node: initExpensesNode,
       inputType: TextInputType.number,
       formatter: DecimalFormatter(),
-      submit: (value) => _addChild(context: context),
+      submit: (value) => interstitialAdScreen.start(() => _addChild(context: context)),
       suffixWidget: _createSuffixWidget(),
       validator: (String value){
         if(value.isEmpty) {
@@ -384,8 +394,9 @@ class _HomeScreenState extends State<HomeScreen> {
     backgroundColor: Colors.redAccent,
     onPressed: () {
       showRemoveAlert(
-          context: context,
-          onSuccess: () => _cubit.removeChild()
+        context: context,
+        onSuccess: () => () => _cubit.removeChild(),
+        adScreen: interstitialAdScreen,
       );
     },
     icon: Icons.delete_outline,
@@ -550,7 +561,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.lightBlue,
         child: IconButton(
           padding: const EdgeInsets.all(0),
-          onPressed: () => showDetermineDailyExpensesAlert(context: context, child: child),
+          onPressed: () => showDetermineDailyExpensesAlert(
+              context: context, child: child, adScreen: interstitialAdScreen),
           icon: SvgPicture.asset(ConstAssetImages.giveCoin.path),
         ),
       ),
@@ -558,7 +570,8 @@ class _HomeScreenState extends State<HomeScreen> {
       CircleAvatar(
         backgroundColor: Colors.redAccent,
         child: IconButton(
-            onPressed: () => showPunishChildAlert(context: context, child: child),
+            onPressed: () => showPunishChildAlert(
+                context: context, child: child, adScreen: interstitialAdScreen),
             icon: Icon(Icons.not_interested, color: Colors.white,)
         ),
       ),

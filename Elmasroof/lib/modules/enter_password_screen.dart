@@ -1,5 +1,6 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/auth_cubit/auth_states.dart';
+import 'package:elmasroof/layouts/ads/banner_ad_widget.dart';
 import 'package:elmasroof/modules/home_screen.dart';
 import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
@@ -41,25 +42,31 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBarWidget(),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(ConstAssetImages.balance.path),
-              SizedBox(height: 10,),
-              passwordField(),
-              _handleBiometricButton(),
-              SizedBox(height: 10,),
-              createButton(
-                text: 'دخول',
-                onPressed: () => _submit(),
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(ConstAssetImages.balance.path),
+                    SizedBox(height: 10,),
+                    passwordField(),
+                    _handleBiometricButton(),
+                    SizedBox(height: 10,),
+                    createButton(
+                      text: 'دخول',
+                      onPressed: () => _submit(),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 30,),
-            ],
+            ),
           ),
-        ),
+          BannerAdWidget(),
+        ],
       ),
     );
   }

@@ -14,6 +14,8 @@ import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
@@ -57,6 +59,8 @@ Future<void> init() async{
   await HiveStorage.getInstance();
   await SqfliteDB.createDB();
   Bloc.observer = MyBlocObserver();
+  await dotenv.load(fileName: ".env");
+  await MobileAds.instance.initialize();
   await SharedManager.init();
   await AppDeviceInfo.init();
 }

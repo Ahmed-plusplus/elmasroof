@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:elmasroof/cubit/daily_expenses_cubit/daily_expenses_cubit.dart';
 import 'package:elmasroof/cubit/daily_expenses_cubit/daily_expenses_state.dart';
+import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/choose_currency_alert.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
@@ -18,21 +19,22 @@ FocusNode expensesNode = FocusNode();
 void showDetermineDailyExpensesAlert({
   required BuildContext context,
   required ChildModel child,
+  required InterstitialAdScreen adScreen,
 }){
   DailyExpensesCubit cubit = DailyExpensesCubit.get(context);
   expensesController.text = '${child.increment[cubit.currency] ?? 0}';
   showGeneralDialog(
       context: context,
       pageBuilder: (context, animation, secondaryAnimation){
-        return _createDialog(context, child, cubit);
+        return _createDialog(context, child, cubit, adScreen);
       },
       barrierLabel: 'determine daily expenses alert',
       barrierDismissible: true
   );
 }
 
-Widget _createDialog(BuildContext context, ChildModel child, DailyExpensesCubit cubit)
-=> Dialog(
+Widget _createDialog(BuildContext context, ChildModel child, DailyExpensesCubit cubit,
+    InterstitialAdScreen adScreen) => Dialog(
   backgroundColor: Colors.white,
   surfaceTintColor: Colors.white,
   alignment: Alignment.center,
@@ -41,13 +43,13 @@ Widget _createDialog(BuildContext context, ChildModel child, DailyExpensesCubit 
     filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
     child: Padding(
       padding: const EdgeInsets.all(8.0),
-      child: _createBody(context, child, cubit),
+      child: _createBody(context, child, cubit, adScreen),
     ),
   ),
 );
 
-Widget _createBody(BuildContext context, ChildModel child, DailyExpensesCubit cubit)
-=> Column(
+Widget _createBody(BuildContext context, ChildModel child, DailyExpensesCubit cubit,
+    InterstitialAdScreen adScreen) => Column(
   mainAxisSize: MainAxisSize.min,
   crossAxisAlignment: CrossAxisAlignment.center,
   children: [
@@ -57,10 +59,12 @@ Widget _createBody(BuildContext context, ChildModel child, DailyExpensesCubit cu
       text: 'انشاء مبلغ الزيادة',
       onPressed: () {
         if(expensesKey.currentState!.validate()) {
-          child.increment[cubit.currency] = double.parse(expensesController.text);
-          HiveStorage hiveStorage = HiveStorage();
-          hiveStorage.put(child.name, child);
-          Navigator.of(context).pop();
+          adScreen.start(() {
+            child.increment[cubit.currency] = double.parse(expensesController.text);
+            HiveStorage hiveStorage = HiveStorage();
+            hiveStorage.put(child.name, child);
+            Navigator.of(context).pop();
+          });
         }
       },
     ),

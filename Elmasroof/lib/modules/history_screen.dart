@@ -1,5 +1,6 @@
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
 import 'package:elmasroof/cubit/history_cubit/history_states.dart';
+import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
@@ -24,6 +25,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   SqfliteDB db = SqfliteDB();
   late HistoryCubit cubit;
+  InterstitialAdScreen interstitialAdScreen = InterstitialAdScreen();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    interstitialAdScreen.start();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    interstitialAdScreen.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +152,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         => cubit.updateDescriptionOfTransaction(id, description),
         child: child,
         description: child.description,
+        adScreen: interstitialAdScreen
       ),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8.0),

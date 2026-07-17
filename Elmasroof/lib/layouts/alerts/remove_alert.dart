@@ -1,23 +1,26 @@
 import 'dart:ui';
 
+import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:flutter/material.dart';
 
 void showRemoveAlert({
   required BuildContext context,
   required VoidCallback onSuccess,
+  required InterstitialAdScreen adScreen,
 }){
   showGeneralDialog(
     context: context,
     pageBuilder: (context, animation, secondaryAnimation){
-      return _createDialog(context, onSuccess);
+      return _createDialog(context, onSuccess, adScreen);
     },
     barrierLabel: 'remove alert',
     barrierDismissible: true,
   );
 }
 
-Widget _createDialog(BuildContext context, VoidCallback onSuccess) => Dialog(
+Widget _createDialog(BuildContext context, VoidCallback onSuccess, InterstitialAdScreen adScreen)
+=> Dialog(
   backgroundColor: Colors.white,
   surfaceTintColor: Colors.white,
   alignment: Alignment.center,
@@ -26,12 +29,13 @@ Widget _createDialog(BuildContext context, VoidCallback onSuccess) => Dialog(
     filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
     child: Padding(
       padding: const EdgeInsets.all(8.0),
-      child: _createBody(context, onSuccess),
+      child: _createBody(context, onSuccess, adScreen),
     ),
   ),
 );
 
-Widget _createBody(BuildContext context, VoidCallback onSuccess) => Column(
+Widget _createBody(BuildContext context, VoidCallback onSuccess, InterstitialAdScreen adScreen)
+=> Column(
   mainAxisSize: MainAxisSize.min,
   children: [
     Icon(Icons.highlight_remove, color: Colors.red, size: 80.0,),
@@ -41,7 +45,7 @@ Widget _createBody(BuildContext context, VoidCallback onSuccess) => Column(
     Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _acceptButton(context, onSuccess),
+        _acceptButton(context, onSuccess, adScreen),
         _rejectButton(context),
       ],
     ),
@@ -61,15 +65,17 @@ Widget _rejectButton(BuildContext context) => Expanded(
   ),
 );
 
-Widget _acceptButton(BuildContext context, VoidCallback onSuccess) => Expanded(
+Widget _acceptButton(BuildContext context, VoidCallback onSuccess, InterstitialAdScreen adScreen) => Expanded(
   child: createButton(
       text: 'نعم',
       icon: Icons.check,
       width: 100.0,
       horizontalPadding: 8.0,
       onPressed: (){
-        Navigator.of(context).pop(true);
-        onSuccess();
+        adScreen.start((){
+          Navigator.of(context).pop(true);
+          onSuccess();
+        });
       }
   ),
 );

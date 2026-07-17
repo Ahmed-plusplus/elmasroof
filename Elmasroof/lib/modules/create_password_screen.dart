@@ -1,5 +1,6 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/auth_cubit/auth_states.dart';
+import 'package:elmasroof/layouts/ads/banner_ad_widget.dart';
 import 'package:elmasroof/layouts/custom_widget/radio_group/custom_radio_group.dart';
 import 'package:elmasroof/modules/home_screen.dart';
 import 'package:elmasroof/modules/rewards_screen.dart';
@@ -34,30 +35,34 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBarWidget(),
-      body: Stack(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20,),
-                  _title(),
-                  const SizedBox(height: 20,),
-                  _parentTypeWidget(),
-                  const SizedBox(height: 20,),
-                  _passwordField(),
-                  _repasswordField(),
-                  _handleBiometricButton(),
-                  createButton(
-                    text: 'دخول',
-                    onPressed: () => _submit(),
-                  ),
-                ],
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20,),
+                    _title(),
+                    const SizedBox(height: 20,),
+                    _parentTypeWidget(),
+                    const SizedBox(height: 20,),
+                    _passwordField(),
+                    _repasswordField(),
+                    _handleBiometricButton(),
+                    createButton(
+                      text: 'دخول',
+                      onPressed: () => _submit(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          BannerAdWidget(),
         ],
       ),
     );
