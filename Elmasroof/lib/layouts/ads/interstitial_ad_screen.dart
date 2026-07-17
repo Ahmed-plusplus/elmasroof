@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -45,6 +46,7 @@ class InterstitialAdScreen {
   }
 
   void start([Function? function]){
+    FocusManager.instance.primaryFocus?.unfocus();
     if (_interstitialAd != null) {
       _func.clear();
       function == null ? null :_func.add(function);
