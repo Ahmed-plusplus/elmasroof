@@ -73,8 +73,8 @@ Widget _acceptButton(BuildContext context, VoidCallback onSuccess, InterstitialA
       horizontalPadding: 8.0,
       onPressed: (){
         adScreen.start((){
-          Navigator.of(context).pop(true);
           onSuccess();
+          Navigator.of(context).pop(true);
         });
       }
   ),

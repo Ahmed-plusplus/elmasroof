@@ -395,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
     onPressed: () {
       showRemoveAlert(
         context: context,
-        onSuccess: () => () => _cubit.removeChild(),
+        onSuccess: () => _cubit.removeChild(),
         adScreen: interstitialAdScreen,
       );
     },

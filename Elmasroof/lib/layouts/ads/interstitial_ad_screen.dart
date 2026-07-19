@@ -30,7 +30,9 @@ class InterstitialAdScreen {
           _interstitialAd = ad;
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
-              _func[0]();
+              if(_func.isNotEmpty) {
+                _func[0]();
+              }
               ad.dispose();
             },
             onAdFailedToShowFullScreenContent: (ad, err){
@@ -49,12 +51,13 @@ class InterstitialAdScreen {
     FocusManager.instance.primaryFocus?.unfocus();
     if (_interstitialAd != null) {
       _func.clear();
-      function == null ? null :_func.add(function);
+      function == null ? null : _func.add(function);
       _interstitialAd!.show();
       _interstitialAd = null; // prevent reusing
       _loadInterstitialAd();  // load another for next time
     } else {
       print("Ad not loaded yet!");
+      function?.call();
       _loadInterstitialAd();
     }
   }
