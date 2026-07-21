@@ -1,6 +1,8 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
+import 'package:elmasroof/layouts/ads/banner_ad_widget.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
 import 'package:elmasroof/shared/components/components.dart';
+import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -29,16 +31,29 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       appBar: appBarWidget(),
       body: Column(
         children: [
-          if(SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false)
-            _oldPasswordField(),
-          _newPasswordField(),
-          _reNewPasswordField(),
-          Spacer(),
-          createButton(
-            text: 'تغيير كلمة المرور',
-            onPressed: () => _submit(),
+          Image.asset(ConstAssetImages.saveMoney.path),
+          SizedBox(height: 8,),
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if(!(SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false))
+                      _oldPasswordField(),
+                    _newPasswordField(),
+                    _reNewPasswordField(),
+                    createButton(
+                      text: 'تغيير كلمة المرور',
+                      onPressed: () => _submit(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          SizedBox(height: 12,),
+          SizedBox(height: 8,),
+          BannerAdWidget(),
         ],
       ),
     );
