@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/cubit/daily_expenses_cubit/daily_expenses_cubit.dart';
 import 'package:elmasroof/cubit/history_cubit/history_cubit.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
+import 'package:elmasroof/firebase_options.dart';
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/modules/splash_screen.dart';
@@ -12,6 +15,7 @@ import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -63,4 +67,7 @@ Future<void> init() async{
   await MobileAds.instance.initialize();
   await SharedManager.init();
   await AppDeviceInfo.init();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 }
