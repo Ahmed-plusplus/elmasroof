@@ -71,6 +71,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   void _submit() {
     if(passwordKey.currentState!.validate() && confirmPasswordKey.currentState!.validate()){
       SharedManager.putData(key: SharedManager.LOGIN_PASSWORD, value: passwordController.text);
+      SharedManager.putData(key: SharedManager.PARENT_TYPE, value: parentType.index);
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder:
           (context) => RewardsScreen(callback:
               (context) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder:
