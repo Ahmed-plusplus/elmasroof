@@ -1,4 +1,7 @@
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
+import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
+import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
+import 'package:elmasroof/layouts/alerts/merge_with_firebase_alert.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
 import 'package:elmasroof/modules/about_screen.dart';
 import 'package:elmasroof/modules/forget_password_screen.dart';
@@ -32,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ValueNotifier(SharedManager.getData(key: SharedManager.CLIENT_ID) ?? '');
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  InterstitialAdScreen interstitialAdScreen = InterstitialAdScreen();
 
   @override
   void initState() {
@@ -48,6 +52,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _linkApp(),
       _aboutApp()
     ];
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    interstitialAdScreen.dispose();
+    super.dispose();
   }
 
   @override
@@ -208,15 +219,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if(userCredential.additionalUserInfo?.isNewUser ?? false) {
         // First time sign-in
-        showSuccessDialog(context: context, message: 'تم تسجيل الدخول بنجاح');
+        showSuccessDialog(context: context, message: 'تم التسجيل بنجاح');
         _setClientIdValue(userCredential.user?.uid ?? '');
+        // Sync local storage with Firebase
       } else {
         // Subsequent sign-in
-        showSuccessDialog(context: context, message: 'تم تسجيل الدخول مسبقًا');
+        showMergeWithFirebaseAlert(
+          context: context,
+          onPreviousChoose: () {/*get all data from firebase then clear and write it to local storage*/},
+          onCurrentChoose: () {/*clear firebase data then sync local storage with firebase*/},
+          adScreen: interstitialAdScreen,
+        );
         _setClientIdValue(userCredential.user?.uid ?? '');
       }
     } else {
-      showSuccessDialog(context: context, message: 'فشل تسجيل الدخول');
+      showFailedDialog(context: context, message: 'فشل تسجيل الدخول');
     }
   }
 
@@ -253,7 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _linkApp() => ValueListenableBuilder(
     valueListenable: clientId,
     builder: (context, value, child){
-      return value.isEmpty ? _linkAppWithGmail() : _linkAppWithOtherParent();
+      return value.isEmpty || true ? _linkAppWithGmail() : _linkAppWithOtherParent();
     },
   );
 
