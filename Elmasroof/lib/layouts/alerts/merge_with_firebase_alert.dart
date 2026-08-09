@@ -39,10 +39,12 @@ Widget _createBody(BuildContext context, VoidCallback onPreviousChoose, VoidCall
 => Column(
   mainAxisSize: MainAxisSize.min,
   children: [
-    Icon(Icons.warning_amber, color: Colors.black, size: 80.0,),
+    Icon(Icons.error_outline_rounded, color: Colors.red, size: 80.0,),
     const SizedBox(height: 16.0,),
-    const Text('الحساب مسجل مسبقاً. هل تريد استرداد البيانات السابقة أم الاحتفاظ بالحالية؟', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
-    const SizedBox(height: 24.0,),
+    const Text('الحساب مسجل مسبقاً. هل تريد استرداد البيانات السابقة أم الاحتفاظ بالحالية؟',
+      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
+    ),
+    const SizedBox(height: 16.0,),
     Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

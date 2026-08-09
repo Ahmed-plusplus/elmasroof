@@ -88,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     width: 150,
                     height: 150,
                     child: PrettyQrView.data(
-                      data: AppDeviceInfo.id,
+                      data: clientId.value,
                       decoration: PrettyQrDecoration(
                         shape: const PrettyQrSmoothSymbol(
                           color: Colors.lightBlue,
@@ -233,7 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _setClientIdValue(userCredential.user?.uid ?? '');
       }
     } else {
-      showFailedDialog(context: context, message: 'فشل تسجيل الدخول');
+      showFailedDialog(context: context, message: 'لم يتم تسجيل الدخول');
     }
   }
 
@@ -270,7 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _linkApp() => ValueListenableBuilder(
     valueListenable: clientId,
     builder: (context, value, child){
-      return value.isEmpty || true ? _linkAppWithGmail() : _linkAppWithOtherParent();
+      return value.isEmpty ? _linkAppWithGmail() : _linkAppWithOtherParent();
     },
   );
 
