@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
 import 'package:elmasroof/layouts/alerts/merge_with_firebase_alert.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
+import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/user_model.dart';
 import 'package:elmasroof/modules/about_screen.dart';
 import 'package:elmasroof/modules/forget_password_screen.dart';
+import 'package:elmasroof/modules/qr_scanner_screen.dart';
 import 'package:elmasroof/modules/rewards_screen.dart';
 import 'package:elmasroof/shared/biometric_availability.dart';
 import 'package:elmasroof/shared/components/components.dart';
@@ -39,10 +43,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   InterstitialAdScreen interstitialAdScreen = InterstitialAdScreen();
+  final HiveStorage _hiveStorage = HiveStorage();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     _authCubit = AuthCubit.get(context);
@@ -59,7 +63,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     interstitialAdScreen.dispose();
     super.dispose();
   }
@@ -72,40 +75,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            ListView.separated(
-              itemCount: items.length,
-              itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: items[index],
+            Expanded(
+              child: ListView.separated(
+                itemCount: items.length,
+                itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: items[index],
+                ),
+                separatorBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  child: Container(height: 1, color: Colors.grey,),
+                ),
               ),
-              separatorBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Container(height: 1, color: Colors.grey,),
-              ),
-              shrinkWrap: true,
             ),
             if(clientId.value.isNotEmpty)
               Expanded(
-                child: Center(
-                  child: SizedBox(
-                    width: 150,
-                    height: 150,
-                    child: PrettyQrView.data(
-                      data: clientId.value,
-                      decoration: PrettyQrDecoration(
-                        shape: const PrettyQrSmoothSymbol(
-                          color: Colors.lightBlue,
-                        ),
-                        image: PrettyQrDecorationImage(
-                          image: SvgImageProvider(
-                            ConstAssetImages.expenses.path,
-                          ),
-                        ),
-                        background: Colors.transparent,
-                        quietZone: PrettyQrQuietZone.zero,
+                child: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: PrettyQrView.data(
+                    data: jsonEncode({
+                      'type': 'link_parent_qr',
+                      'app': 'Elmasroof',
+                      'data': clientId.value,
+                    }),
+                    decoration: PrettyQrDecoration(
+                      shape: const PrettyQrSmoothSymbol(
+                        color: Colors.lightBlue,
                       ),
-                      errorCorrectLevel: QrErrorCorrectLevel.H
+                      image: PrettyQrDecorationImage(
+                        image: SvgImageProvider(
+                          ConstAssetImages.expenses.path,
+                        ),
+                      ),
+                      background: Colors.transparent,
+                      quietZone: PrettyQrQuietZone.zero,
                     ),
+                    errorCorrectLevel: QrErrorCorrectLevel.H
                   ),
                 ),
               ),
@@ -230,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             uid: userCredential.user?.uid ?? '',
             parentType: SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0,
             lastUpdate: DateTime.now(),
-            children: HiveStorage().getAll() ?? [],
+            children: _hiveStorage.getAll() ?? [],
           ),
         );
       } else {
@@ -239,12 +245,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           context: context,
           onPreviousChoose: () {
             /*get all data from firebase then clear and write it to local storage*/
-            HiveStorage().removeAll()
+            _hiveStorage.removeAll()
                 .then((value) {
                   FirebaseHandler.instance.getUser(userCredential.user?.uid ?? '')
                       .then((userModel) {
                     if (userModel != null) {
-                      userModel.children.forEach((child) => HiveStorage().put(child.name, child));
+                      userModel.children.forEach((child) => _hiveStorage.put(child.name, child));
                       showSuccessDialog(context: context, message: 'تم استرداد البيانات السابقة');
                     } else {
                       showFailedDialog(context: context, message: 'لم يتم العثور على بيانات سابقة');
@@ -263,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   uid: userCredential.user?.uid ?? '',
                   parentType: SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0,
                   lastUpdate: DateTime.now(),
-                  children: HiveStorage().getAll() ?? [],
+                  children: _hiveStorage.getAll() ?? [],
                 ),
               ).then((value) {
                 print('Data synced with Firebase');
@@ -318,7 +324,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   );
 
   Widget _linkAppWithOtherParent() => GestureDetector(
-    onTap: () => null,
+    onTap: () => handleLinkParents(),
     child: Row(
       children: [
         Icon(Icons.link, color: Colors.grey,),
@@ -332,5 +338,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
     clientId.value = uid;
     SharedManager.putData(key: SharedManager.USER_ID, value: uid);
     print('clientId: $uid');
+  }
+
+  Future<void> handleLinkParents() async{
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const QRScannerScreen(),
+      ),
+    );
+
+    if (result != null) {
+      print('Scanned data: $result');
+      if(result == 'Invalid QR for app') {
+        showFailedDialog(context: context, message: 'هذا الرمز غير صالح مع التطبيق');
+      } else if(result == 'Invalid QR format') {
+        showFailedDialog(context: context, message: 'الرمز غير صالح');
+      } else if(result == 'No QR detected') {
+        showFailedDialog(context: context, message: 'لم يتم مسح أي رمز');
+      } else if(result == clientId.value) {
+        showFailedDialog(context: context, message: 'لا يمكن ربط الحساب بنفسه');
+      } else {
+        // Link the children to the other parent's account
+        FirebaseHandler.instance.getUser(result)
+            .then((userModel) {
+          if (userModel != null) {
+            if(userModel.parentType == SharedManager.getData(key: SharedManager.PARENT_TYPE)) {
+              showFailedDialog(context: context, message: 'لا يمكن ربط الأطفال بحساب من نفس النوع (أب/أم)');
+              return;
+            }
+            userModel.children.forEach((child) {
+              child.otherParentId = clientId.value;
+              var existingChild = _hiveStorage.get(child.name);
+              if(existingChild == null) {
+                _hiveStorage.put(child.name, child);
+              } else {
+                // TODO:: handle conflict: if the child already exists in local storage, we can choose to update the otherParentId or keep it as is
+                existingChild.otherParentId = clientId.value;
+                _hiveStorage.put(existingChild.name, existingChild);
+              }
+            });
+
+            FirebaseHandler.instance.linkParents(clientId.value, result, _hiveStorage.getAll() ?? []);
+            showSuccessDialog(context: context, message: 'تم ربط الأطفال بحساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}');
+          } else {
+            showFailedDialog(context: context, message: 'لم يتم العثور على بيانات الحساب الآخر');
+          }
+        }).catchError((e) => print('Error fetching data from Firebase: $e'));
+      }
+    }
   }
 }

@@ -29,7 +29,6 @@ class _EnterPasswordScreenState extends State<EnterPasswordScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     authCubit = AuthCubit.get(context);
     if (_availability.isSupported

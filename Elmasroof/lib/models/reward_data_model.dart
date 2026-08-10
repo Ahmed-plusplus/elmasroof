@@ -12,4 +12,15 @@ class RewardDataModel {
   bool isShowed;
 
   RewardDataModel(this.value, this.isTaken, this.isShowed);
+
+  RewardDataModel.fromJson(Map<String, dynamic> json)
+      : value = json['value'].toDouble(),
+        isTaken = json['isTaken'],
+        isShowed = json['isShowed'];
+
+  Map<String, dynamic> toMap() => {
+    'value': value,
+    'isTaken': isTaken,
+    'isShowed': isShowed,
+  };
 }

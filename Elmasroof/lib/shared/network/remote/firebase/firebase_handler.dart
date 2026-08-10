@@ -21,22 +21,7 @@ class FirebaseHandler {
       });
       user.children.forEach((child) async =>
           await _root.doc(SharedManager.getData(key: SharedManager.USER_ID)).collection('children')
-          .doc(child.name).set({
-            'name': child.name,
-            'expenses': child.expenses.map((currency, amount) =>
-                MapEntry(currency.id.toString(), amount)),
-            'stickerPath': child.stickerPath,
-            'increment': child.increment.map((currency, amount) =>
-                MapEntry(currency.id.toString(), amount)),
-            'punishmentUntil': child.punishmentUntil?.toIso8601String(),
-            'rewards': child.rewards.map((reward, rewardData) =>
-                MapEntry(reward.id.toString(), {
-                  'value': rewardData.value,
-                  'isTaken': rewardData.isTaken,
-                  'isShowed': rewardData.isShowed,
-                })),
-            'otherParentId': null,
-          })
+          .doc(child.name).set(child.toMap())
       );
       return Future.value(true);
     } catch (e) {
@@ -58,24 +43,7 @@ class FirebaseHandler {
           lastUpdate: DateTime.parse(data['lastUpdate']),
           children: childrenCollection.docs.map((childDoc) {
             final childData = childDoc.data();
-            return ChildModel(
-              name: childData['name'],
-              expenses: (childData['expenses'] as Map<String, dynamic>).map((key, value) =>
-                  MapEntry(Currency.values.firstWhere((c) => c.id == int.parse(key)), value.toDouble())),
-              stickerPath: childData['stickerPath'],
-              increment: (childData['increment'] as Map<String, dynamic>).map((key, value) =>
-                  MapEntry(Currency.values.firstWhere((c) => c.id == int.parse(key)), value.toDouble())),
-              punishmentUntil: childData['punishmentUntil'] != null
-                  ? DateTime.parse(childData['punishmentUntil'])
-                  : null,
-              rewards: (childData['rewards'] as Map<String, dynamic>).map((key, rewardData) =>
-                  MapEntry(Reward.values.firstWhere((reward) => reward.id == int.parse(key)), RewardDataModel(
-                    rewardData['value'].toDouble(),
-                    rewardData['isTaken'],
-                    rewardData['isShowed'],
-                  ))),
-              otherParentId: data['otherParentId']
-            );
+            return ChildModel.fromJson(childData);
           }).toList(),
         );
       } else {
@@ -97,6 +65,20 @@ class FirebaseHandler {
       return Future.value(true);
     } catch (e) {
       print('Error removing all data: $e');
+      return Future.value(false);
+    }
+  }
+
+  Future<bool> linkParents(String uid, String otherParentId, List<ChildModel> children) async {
+    try {
+      for (var child in children) {
+        await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
+        await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
+        await _root.doc(otherParentId).collection('children').doc(child.name).update({'otherParentId': uid});
+      }
+      return Future.value(true);
+    } catch (e) {
+      print('Error linking parents: $e');
       return Future.value(false);
     }
   }

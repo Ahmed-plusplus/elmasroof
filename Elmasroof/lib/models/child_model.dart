@@ -37,4 +37,32 @@ class ChildModel {
     required this.rewards,
     this.otherParentId,
   });
+
+  ChildModel.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        expenses = (json['expenses'] as Map<String, dynamic>).map((key, value) =>
+            MapEntry(Currency.values.firstWhere((c) => c.id == int.parse(key)), value.toDouble())),
+        stickerPath = json['stickerPath'],
+        increment = (json['increment'] as Map<String, dynamic>).map((key, value) =>
+            MapEntry(Currency.values.firstWhere((c) => c.id == int.parse(key)), value.toDouble())),
+        punishmentUntil = json['punishmentUntil'] != null
+            ? DateTime.parse(json['punishmentUntil'])
+            : null,
+        rewards = (json['rewards'] as Map<String, dynamic>).map((key, rewardData) =>
+            MapEntry(Reward.values.firstWhere((reward) => reward.id == int.parse(key)),
+                RewardDataModel.fromJson(rewardData))),
+        otherParentId = json['otherParentId'];
+
+  Map<String, dynamic> toMap() => {
+    'name': name,
+    'expenses': expenses.map((currency, amount) =>
+        MapEntry(currency.id.toString(), amount)),
+    'stickerPath': stickerPath,
+    'increment': increment.map((currency, amount) =>
+        MapEntry(currency.id.toString(), amount)),
+    'punishmentUntil': punishmentUntil?.toIso8601String(),
+    'rewards': rewards.map((reward, rewardData) =>
+        MapEntry(reward.id.toString(), rewardData.toMap())),
+    'otherParentId': otherParentId,
+  };
 }
