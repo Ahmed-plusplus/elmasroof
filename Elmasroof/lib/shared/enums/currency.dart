@@ -5,21 +5,23 @@ part 'currency.g.dart';
 @HiveType(typeId: 2)
 enum Currency {
   @HiveField(0)
-  pound('Pound', 'assets/images/pound_icon.svg'),
+  pound('Pound', 'assets/images/pound_icon.svg', 1),
   @HiveField(1)
-  dollar('Dollar', 'assets/images/dollar_icon.svg'),
+  dollar('Dollar', 'assets/images/dollar_icon.svg', 2),
   @HiveField(2)
-  gold18('Gold 18', 'assets/images/gold_bar_18.svg'),
+  gold18('Gold 18', 'assets/images/gold_bar_18.svg', 11),
   @HiveField(3)
-  gold21('Gold 21', 'assets/images/gold_bar_21.svg'),
+  gold21('Gold 21', 'assets/images/gold_bar_21.svg', 12),
   @HiveField(4)
-  gold24('Gold 24', 'assets/images/gold_bar_24.svg');
+  gold24('Gold 24', 'assets/images/gold_bar_24.svg', 13);
 
   final String name;
   final String icon;
+  final int id;
 
   const Currency(
     this.name,
     this.icon,
+    this.id,
   );
 }

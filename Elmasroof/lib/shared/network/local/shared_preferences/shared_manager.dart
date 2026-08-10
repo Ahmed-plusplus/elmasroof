@@ -9,7 +9,7 @@ class SharedManager {
 
   static const String PARENT_TYPE = 'parentType';
   static const String LAST_DATE = 'lastDate';
-  static const String CLIENT_ID = 'clientId';
+  static const String USER_ID = 'userId';
 
   SharedManager._();
 

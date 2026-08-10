@@ -3,6 +3,7 @@ import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
 import 'package:elmasroof/layouts/alerts/merge_with_firebase_alert.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
+import 'package:elmasroof/models/user_model.dart';
 import 'package:elmasroof/modules/about_screen.dart';
 import 'package:elmasroof/modules/forget_password_screen.dart';
 import 'package:elmasroof/modules/rewards_screen.dart';
@@ -11,7 +12,9 @@ import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/app_device_info.dart';
 import 'package:elmasroof/shared/enums/auth_type.dart';
+import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
+import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -32,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final ValueNotifier<bool> _isBiometricEnabled =
     ValueNotifier(SharedManager.getData(key: SharedManager.LOGIN_BIOMETRIC) ?? false);
   ValueNotifier<String> clientId =
-    ValueNotifier(SharedManager.getData(key: SharedManager.CLIENT_ID) ?? '');
+    ValueNotifier(SharedManager.getData(key: SharedManager.USER_ID) ?? '');
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   InterstitialAdScreen interstitialAdScreen = InterstitialAdScreen();
@@ -222,12 +225,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
         showSuccessDialog(context: context, message: 'تم التسجيل بنجاح');
         _setClientIdValue(userCredential.user?.uid ?? '');
         // Sync local storage with Firebase
+        FirebaseHandler.instance.addNewUser(
+          UserModel(
+            uid: userCredential.user?.uid ?? '',
+            parentType: SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0,
+            lastUpdate: DateTime.now(),
+            children: HiveStorage().getAll() ?? [],
+          ),
+        );
       } else {
         // Subsequent sign-in
         showMergeWithFirebaseAlert(
           context: context,
-          onPreviousChoose: () {/*get all data from firebase then clear and write it to local storage*/},
-          onCurrentChoose: () {/*clear firebase data then sync local storage with firebase*/},
+          onPreviousChoose: () {
+            /*get all data from firebase then clear and write it to local storage*/
+            HiveStorage().removeAll()
+                .then((value) {
+                  FirebaseHandler.instance.getUser(userCredential.user?.uid ?? '')
+                      .then((userModel) {
+                    if (userModel != null) {
+                      userModel.children.forEach((child) => HiveStorage().put(child.name, child));
+                      showSuccessDialog(context: context, message: 'تم استرداد البيانات السابقة');
+                    } else {
+                      showFailedDialog(context: context, message: 'لم يتم العثور على بيانات سابقة');
+                    }
+                  }).catchError((e) => print('Error fetching data from Firebase: $e'));
+            })
+                .catchError((e) => print('Error clearing local storage: $e'));
+
+          },
+          onCurrentChoose: () {
+            /*clear firebase data then sync local storage with firebase*/
+            FirebaseHandler.instance.removeAllData(userCredential.user?.uid ?? '')
+            .then((value) {
+              FirebaseHandler.instance.addNewUser(
+                UserModel(
+                  uid: userCredential.user?.uid ?? '',
+                  parentType: SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0,
+                  lastUpdate: DateTime.now(),
+                  children: HiveStorage().getAll() ?? [],
+                ),
+              ).then((value) {
+                print('Data synced with Firebase');
+              }).catchError((e) => print('Error syncing data with Firebase: $e'));
+            })
+            .catchError((e) => print('Error removing data from Firebase: $e'));
+          },
           adScreen: interstitialAdScreen,
         );
         _setClientIdValue(userCredential.user?.uid ?? '');
@@ -287,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _setClientIdValue(String uid) {
     clientId.value = uid;
-    SharedManager.putData(key: SharedManager.CLIENT_ID, value: uid);
+    SharedManager.putData(key: SharedManager.USER_ID, value: uid);
     print('clientId: $uid');
   }
 }

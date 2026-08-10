@@ -25,6 +25,9 @@ class ChildModel {
   @HiveField(5)
   Map<Reward, RewardDataModel> rewards;
 
+  @HiveField(6)
+  String? otherParentId;
+
   ChildModel({
     required this.name,
     required this.expenses,
@@ -32,5 +35,6 @@ class ChildModel {
     required this.increment,
     this.punishmentUntil,
     required this.rewards,
+    this.otherParentId,
   });
 }

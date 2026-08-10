@@ -27,6 +27,10 @@ class HiveStorage {
 
   ChildModel? getAt(int index) => _box.getAt(index);
 
+  List<ChildModel>? getAll() => _box.values.toList();
+
   void remove(dynamic key) => _box.delete(key);
+
+  Future<void> removeAll() async => await _box.clear();
 
 }
