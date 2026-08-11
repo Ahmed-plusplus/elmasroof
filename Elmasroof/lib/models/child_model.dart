@@ -38,6 +38,16 @@ class ChildModel {
     this.otherParentId,
   });
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChildModel &&
+          runtimeType == other.runtimeType &&
+          name == other.name;
+
+  @override
+  int get hashCode => name.hashCode;
+
   ChildModel.fromJson(Map<String, dynamic> json)
       : name = json['name'],
         expenses = (json['expenses'] as Map<String, dynamic>).map((key, value) =>

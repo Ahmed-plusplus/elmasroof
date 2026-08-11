@@ -4,6 +4,7 @@ import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
 import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
 import 'package:elmasroof/layouts/alerts/merge_with_firebase_alert.dart';
+import 'package:elmasroof/layouts/alerts/select_children_alert.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/user_model.dart';
@@ -361,26 +362,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         // Link the children to the other parent's account
         FirebaseHandler.instance.getUser(result)
-            .then((userModel) {
-          if (userModel != null) {
-            if(userModel.parentType == SharedManager.getData(key: SharedManager.PARENT_TYPE)) {
+            .then((otherParent) {
+          if (otherParent != null) {
+            if(otherParent.parentType == SharedManager.getData(key: SharedManager.PARENT_TYPE)) {
               showFailedDialog(context: context, message: 'لا يمكن ربط الأطفال بحساب من نفس النوع (أب/أم)');
               return;
             }
-            userModel.children.forEach((child) {
-              child.otherParentId = clientId.value;
-              var existingChild = _hiveStorage.get(child.name);
-              if(existingChild == null) {
-                _hiveStorage.put(child.name, child);
-              } else {
-                // TODO:: handle conflict: if the child already exists in local storage, we can choose to update the otherParentId or keep it as is
-                existingChild.otherParentId = clientId.value;
-                _hiveStorage.put(existingChild.name, existingChild);
-              }
-            });
-
-            FirebaseHandler.instance.linkParents(clientId.value, result, _hiveStorage.getAll() ?? []);
-            showSuccessDialog(context: context, message: 'تم ربط الأطفال بحساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}');
+            // create alert to confirm linking the children to the other parent's account
+            showSelectChildrenAlert(
+              context: context,
+              yourChildren: _hiveStorage.getAll()?.where((child) => child.otherParentId == null).toList() ?? [],
+              otherChildren: otherParent.children.where((child) => child.otherParentId == null).toList(),
+              otherParentId: result,
+              adScreen: InterstitialAdScreen(),
+              onDismiss: () =>
+                showSuccessDialog(
+                    context: context,
+                    message: 'تم ربط الأطفال بحساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}'
+                )
+            );
           } else {
             showFailedDialog(context: context, message: 'لم يتم العثور على بيانات الحساب الآخر');
           }

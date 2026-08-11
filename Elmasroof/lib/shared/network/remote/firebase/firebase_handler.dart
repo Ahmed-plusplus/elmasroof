@@ -73,12 +73,25 @@ class FirebaseHandler {
     try {
       for (var child in children) {
         await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
+        child.otherParentId = uid;
         await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
-        await _root.doc(otherParentId).collection('children').doc(child.name).update({'otherParentId': uid});
       }
       return Future.value(true);
     } catch (e) {
       print('Error linking parents: $e');
+      return Future.value(false);
+    }
+  }
+
+  Future<bool> unlinkChild(String uid, ChildModel child) async {
+    try {
+      String otherParentId = child.otherParentId!;
+      child.otherParentId = null;
+      await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
+      await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
+      return Future.value(true);
+    } catch (e) {
+      print('Error unlinking child: $e');
       return Future.value(false);
     }
   }
