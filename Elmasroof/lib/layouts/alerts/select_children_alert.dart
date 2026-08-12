@@ -45,7 +45,7 @@ Widget _createDialog(BuildContext context, List<ChildModel> yourChildren, List<C
 );
 
 Widget _createBody(BuildContext context, List<ChildModel> yourChildren, List<ChildModel> otherChildren, String otherParentId, InterstitialAdScreen adScreen, VoidCallback? onDismiss) {
-  ParentType yourType = SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? ParentType.father;
+  ParentType yourType = ParentType.values[SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0];
   ValueNotifier<ParentType> selectedParentType = ValueNotifier(yourType);
   Set<String> selectedChildren = {};
   Set<ChildModel> childrenList = {};
