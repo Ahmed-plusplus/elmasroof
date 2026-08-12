@@ -23,7 +23,7 @@ void showUnlinkChildrenAlert({
       return _createDialog(context, children, adScreen, onDismiss);
     },
     barrierLabel: 'unlink children alert',
-    barrierDismissible: false,
+    barrierDismissible: true,
   );
 }
 

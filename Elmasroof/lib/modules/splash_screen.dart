@@ -12,6 +12,7 @@ import 'package:elmasroof/shared/extensions/date_time_extension.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
+import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lottie/lottie.dart';
@@ -103,6 +104,7 @@ class _SplashScreenState extends State<SplashScreen> {
         await _handleIncrement(child!, curr, days, today, db);
       }
       hiveStorage.put(el, child!);
+      FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
     }
     ListenOnValue.expensesNotifier.value++;
   }

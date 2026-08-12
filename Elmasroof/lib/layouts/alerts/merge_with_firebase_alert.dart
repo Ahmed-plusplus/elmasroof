@@ -13,7 +13,7 @@ void showMergeWithFirebaseAlert({
   showGeneralDialog(
     context: context,
     pageBuilder: (context, animation, secondaryAnimation){
-      return _createDialog(context, onPreviousChoose, onCurrentChoose, adScreen);
+      return PopScope(canPop: false, child: _createDialog(context, onPreviousChoose, onCurrentChoose, adScreen));
     },
     barrierLabel: 'merge alert',
     barrierDismissible: false,

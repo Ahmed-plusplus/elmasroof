@@ -31,7 +31,7 @@ void showRewardDialog({
           }
         }
       });
-      return _createDialog(context, name, reward);
+      return PopScope(canPop: false, child: _createDialog(context, name, reward));
     },
     barrierLabel: 'reward dialog',
     barrierDismissible: false,

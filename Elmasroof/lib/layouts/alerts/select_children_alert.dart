@@ -25,7 +25,7 @@ void showSelectChildrenAlert({
       return _createDialog(context, yourChildren, otherChildren, otherParentId, adScreen, onDismiss);
     },
     barrierLabel: 'select children alert',
-    barrierDismissible: false,
+    barrierDismissible: true,
   );
 }
 

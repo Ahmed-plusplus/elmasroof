@@ -6,6 +6,8 @@ import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/extensions/date_time_extension.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
+import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
+import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
 import 'package:flutter/material.dart';
 
 TextEditingController daysController = TextEditingController();
@@ -81,6 +83,7 @@ Widget _createPunishmentButton(BuildContext context, ChildModel child, Interstit
             .add(Duration(days: int.parse(daysController.text)));
         HiveStorage hiveStorage = HiveStorage();
         hiveStorage.put(child.name, child);
+        FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
         Navigator.of(context).pop();
       });
     }

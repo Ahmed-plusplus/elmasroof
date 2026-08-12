@@ -96,4 +96,30 @@ class FirebaseHandler {
     }
   }
 
+  Future<bool> addNewChild(String uid, ChildModel child) async {
+    return await updateChild(uid, child);
+  }
+
+  Future<bool> updateChild(String uid, ChildModel child) async {
+    try {
+      await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
+      if(child.otherParentId != null) {
+        await _root.doc(child.otherParentId!).collection('children').doc(child.name).set(child.toMap());
+      }
+      return Future.value(true);
+    } catch (e) {
+      print('Error updating child expenses: $e');
+      return Future.value(false);
+    }
+  }
+
+  Future<bool> removeChild(String uid, String childName) async {
+    try {
+      await _root.doc(uid).collection('children').doc(childName).delete();
+      return Future.value(true);
+    } catch (e) {
+      print('Error removing child: $e');
+      return Future.value(false);
+    }
+  }
 }

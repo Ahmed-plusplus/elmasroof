@@ -8,6 +8,8 @@ import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
+import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
+import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -63,6 +65,7 @@ Widget _createBody(BuildContext context, ChildModel child, DailyExpensesCubit cu
             child.increment[cubit.currency] = double.parse(expensesController.text);
             HiveStorage hiveStorage = HiveStorage();
             hiveStorage.put(child.name, child);
+            FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
             Navigator.of(context).pop();
           });
         }

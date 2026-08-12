@@ -15,7 +15,7 @@ void showSuccessDialog({
   showGeneralDialog(
       context: context,
       pageBuilder: (context, animation, secondaryAnimation){
-        return _createDialog(context, message);
+        return PopScope(canPop: false, child: _createDialog(context, message));
       },
       barrierLabel: 'success dialog',
       barrierDismissible: false,

@@ -28,6 +28,7 @@ import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/local/sqflite/sqflite_db.dart';
+import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -107,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TransactionType.customTransaction,
           );
           _cubit.hiveStorage.put(item.$1.name, item.$1);
+          FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), item.$1);
           _showRewards(rewardList, index + 1);
         }
       );
