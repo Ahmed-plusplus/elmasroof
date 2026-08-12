@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TransactionType.customTransaction,
           );
           _cubit.hiveStorage.put(item.$1.name, item.$1);
-          FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), item.$1);
+          FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', item.$1);
           _showRewards(rewardList, index + 1);
         }
       );

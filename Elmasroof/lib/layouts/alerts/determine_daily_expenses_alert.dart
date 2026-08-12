@@ -65,7 +65,7 @@ Widget _createBody(BuildContext context, ChildModel child, DailyExpensesCubit cu
             child.increment[cubit.currency] = double.parse(expensesController.text);
             HiveStorage hiveStorage = HiveStorage();
             hiveStorage.put(child.name, child);
-            FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
+            FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child);
             Navigator.of(context).pop();
           });
         }

@@ -32,7 +32,7 @@ class HomeCubit extends Cubit<HomeStates> {
     selectedIndex = childrenNames.length - 1;
     stickerPath = ConstAssetImages.face1.path;
     addChildCurrency = Currency.pound;
-    FirebaseHandler.instance.addNewChild(SharedManager.getData(key: SharedManager.USER_ID), value);
+    FirebaseHandler.instance.addNewChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', value);
     emit(AddChildState(value));
   }
 
@@ -45,7 +45,7 @@ class HomeCubit extends Cubit<HomeStates> {
     var child = hiveStorage.get(childrenNames[selectedIndex])!;
     child.expenses[currency] = (child.expenses[currency] ?? 0) + value;
     hiveStorage.put(childrenNames[selectedIndex], child);
-    FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
+    FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child);
     emit(
       AddToNameState(
         await db.insertChildData(
@@ -63,7 +63,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
   void removeChild(){
     ChildModel child = hiveStorage.get(childrenNames[selectedIndex])!;
-    FirebaseHandler.instance.removeChild(SharedManager.getData(key: SharedManager.USER_ID), child.name);
+    FirebaseHandler.instance.removeChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child.name);
     if(child.otherParentId != null){
       FirebaseHandler.instance.removeChild(child.otherParentId!, child.name);
     }
@@ -82,7 +82,7 @@ class HomeCubit extends Cubit<HomeStates> {
     var child = hiveStorage.get(childrenNames[selectedIndex])!;
     child.stickerPath = ConstAssetImages.faces[index].path;
     hiveStorage.put(childrenNames[selectedIndex], child);
-    FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
+    FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child);
     emit(ChangeChildStickerState());
   }
 

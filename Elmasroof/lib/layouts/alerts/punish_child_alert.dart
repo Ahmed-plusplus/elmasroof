@@ -83,7 +83,7 @@ Widget _createPunishmentButton(BuildContext context, ChildModel child, Interstit
             .add(Duration(days: int.parse(daysController.text)));
         HiveStorage hiveStorage = HiveStorage();
         hiveStorage.put(child.name, child);
-        FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
+        FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child);
         Navigator.of(context).pop();
       });
     }

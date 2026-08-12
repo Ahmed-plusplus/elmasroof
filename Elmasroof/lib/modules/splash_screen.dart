@@ -104,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> {
         await _handleIncrement(child!, curr, days, today, db);
       }
       hiveStorage.put(el, child!);
-      FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID), child);
+      FirebaseHandler.instance.updateChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child);
     }
     ListenOnValue.expensesNotifier.value++;
   }

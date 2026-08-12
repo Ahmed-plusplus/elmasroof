@@ -93,7 +93,7 @@ Widget _createBody(BuildContext context, List<ChildModel> children, Interstitial
               List<ChildModel> selectedChildrenList = childrenList.where((child) => selectedChildren.contains(child.name)).toList();
               HiveStorage hiveStorage = HiveStorage();
               selectedChildrenList.forEach((child) {
-                FirebaseHandler.instance.unlinkChild(SharedManager.getData(key: SharedManager.USER_ID), child);
+                FirebaseHandler.instance.unlinkChild(SharedManager.getData(key: SharedManager.USER_ID) ?? '', child);
                 child.otherParentId = null;
                 hiveStorage.put(child.name, child);
               });

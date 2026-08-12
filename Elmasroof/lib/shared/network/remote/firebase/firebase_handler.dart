@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elmasroof/models/child_model.dart';
-import 'package:elmasroof/models/reward_data_model.dart';
 import 'package:elmasroof/models/user_model.dart';
-import 'package:elmasroof/shared/enums/currency.dart';
-import 'package:elmasroof/shared/enums/reward.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 
 class FirebaseHandler {
@@ -14,6 +11,9 @@ class FirebaseHandler {
   final _root = FirebaseFirestore.instance.collection('users');
 
   Future<bool> addNewUser(UserModel user) async{
+    if(SharedManager.getData(key: SharedManager.USER_ID) == null) {
+      return false;
+    }
     try {
       await _root.doc(SharedManager.getData(key: SharedManager.USER_ID)).set({
         'parentType': user.parentType,
@@ -23,14 +23,17 @@ class FirebaseHandler {
           await _root.doc(SharedManager.getData(key: SharedManager.USER_ID)).collection('children')
           .doc(child.name).set(child.toMap())
       );
-      return Future.value(true);
+      return true;
     } catch (e) {
       print('Error adding new user: $e');
-      return Future.value(false);
+      return false;
     }
   }
 
   Future<UserModel?> getUser(String uid) async {
+    if(uid.isEmpty) {
+      return null;
+    }
     try {
       final doc = await _root.doc(uid).get();
       final childrenCollection = await _root.doc(uid).collection('children').get();
@@ -56,43 +59,52 @@ class FirebaseHandler {
   }
 
   Future<bool> removeAllData(String uid) async {
+    if(uid.isEmpty) {
+      return false;
+    }
     try {
       final childrenCollection = await _root.doc(uid).collection('children').get();
       for (var childDoc in childrenCollection.docs) {
         await childDoc.reference.delete();
       }
       await _root.doc(uid).delete();
-      return Future.value(true);
+      return true;
     } catch (e) {
       print('Error removing all data: $e');
-      return Future.value(false);
+      return false;
     }
   }
 
   Future<bool> linkParents(String uid, String otherParentId, List<ChildModel> children) async {
+    if(uid.isEmpty) {
+      return false;
+    }
     try {
       for (var child in children) {
         await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
         child.otherParentId = uid;
         await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
       }
-      return Future.value(true);
+      return true;
     } catch (e) {
       print('Error linking parents: $e');
-      return Future.value(false);
+      return false;
     }
   }
 
   Future<bool> unlinkChild(String uid, ChildModel child) async {
+    if(uid.isEmpty) {
+      return false;
+    }
     try {
       String otherParentId = child.otherParentId!;
       child.otherParentId = null;
       await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
       await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
-      return Future.value(true);
+      return true;
     } catch (e) {
       print('Error unlinking child: $e');
-      return Future.value(false);
+      return false;
     }
   }
 
@@ -101,25 +113,31 @@ class FirebaseHandler {
   }
 
   Future<bool> updateChild(String uid, ChildModel child) async {
+    if(uid.isEmpty) {
+      return false;
+    }
     try {
       await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
       if(child.otherParentId != null) {
         await _root.doc(child.otherParentId!).collection('children').doc(child.name).set(child.toMap());
       }
-      return Future.value(true);
+      return true;
     } catch (e) {
       print('Error updating child expenses: $e');
-      return Future.value(false);
+      return false;
     }
   }
 
   Future<bool> removeChild(String uid, String childName) async {
+    if(uid.isEmpty) {
+      return false;
+    }
     try {
       await _root.doc(uid).collection('children').doc(childName).delete();
-      return Future.value(true);
+      return true;
     } catch (e) {
       print('Error removing child: $e');
-      return Future.value(false);
+      return false;
     }
   }
 }

@@ -135,7 +135,7 @@ Widget _createBody(BuildContext context, List<ChildModel> yourChildren, List<Chi
                 hiveStorage.put(child.name, child);
               });
 
-              FirebaseHandler.instance.linkParents(SharedManager.getData(key: SharedManager.USER_ID), otherParentId, selectedChildrenList);
+              FirebaseHandler.instance.linkParents(SharedManager.getData(key: SharedManager.USER_ID) ?? '', otherParentId, selectedChildrenList);
 
               Navigator.of(context).pop(true);
 
