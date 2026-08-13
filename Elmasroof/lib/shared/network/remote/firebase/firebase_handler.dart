@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/user_model.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
+import 'package:flutter/cupertino.dart';
 
 class FirebaseHandler {
   FirebaseHandler._();
@@ -80,11 +82,14 @@ class FirebaseHandler {
       return false;
     }
     try {
+      DateTime now = DateTime.now();
       for (var child in children) {
         await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
         child.otherParentId = uid;
         await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
+        await _root.doc(otherParentId).update({'lastUpdate': now.toIso8601String(),});
       }
+      await _root.doc(uid).update({'lastUpdate': now.toIso8601String(),});
       return true;
     } catch (e) {
       print('Error linking parents: $e');
@@ -117,9 +122,13 @@ class FirebaseHandler {
       return false;
     }
     try {
+      DateTime now = DateTime.now();
       await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
+      await _root.doc(uid).update({'lastUpdate': now.toIso8601String(),});
       if(child.otherParentId != null) {
         await _root.doc(child.otherParentId!).collection('children').doc(child.name).set(child.toMap());
+        await _root.doc(child.otherParentId!).collection('children').doc(child.name).update({'otherParentId': uid});
+        await _root.doc(child.otherParentId!).update({'lastUpdate': now.toIso8601String(),});
       }
       return true;
     } catch (e) {
@@ -133,11 +142,37 @@ class FirebaseHandler {
       return false;
     }
     try {
+      DateTime now = DateTime.now();
       await _root.doc(uid).collection('children').doc(childName).delete();
+      await _root.doc(uid).update({'lastUpdate': now.toIso8601String(),});
       return true;
     } catch (e) {
       print('Error removing child: $e');
       return false;
+    }
+  }
+
+  Future<void> listenToChildChanges(BuildContext context, String uid) async {
+    if(uid.isEmpty) {
+      return;
+    }
+    try {
+      _root.doc(uid).collection('children').snapshots().listen((snapshot) {
+        DateTime now = DateTime.now();
+        for (var change in snapshot.docChanges) {
+          if (change.type == DocumentChangeType.modified || change.type == DocumentChangeType.added) {
+            final childData = change.doc.data();
+            if (childData != null) {
+              final child = ChildModel.fromJson(childData);
+              HomeCubit cubit = HomeCubit.get(context);
+              cubit.updateChildFromFirebase(child);
+              _root.doc(uid).update({'lastUpdate': now.toIso8601String(),});
+            }
+          }
+        }
+      });
+    } catch (e) {
+      print('Error listening to child changes: $e');
     }
   }
 }

@@ -9,7 +9,7 @@ class AddChildState extends HomeStates {
   ChildModel childModel;
   AddChildState(this.childModel);
 }
-class ChangeChildState extends HomeStates {}
+class ChangeChildIndexState extends HomeStates {}
 class AddToNameState extends HomeStates {
   ChildExpensesChangingModel child;
   ChildModel childModel;
@@ -21,3 +21,5 @@ class ChangeChildStickerState extends HomeStates {}
 class ChangeAddChildCurrencyState extends HomeStates {}
 class ChangeChildCurrencyState extends HomeStates {}
 class UpdateDescriptionState extends HomeStates {}
+class UpdateChildrenListState extends HomeStates {}
+class ChangeChildState extends HomeStates {}

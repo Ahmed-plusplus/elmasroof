@@ -76,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       _showRewards(rewardList, 0);
       interstitialAdScreen.start();
+      FirebaseHandler.instance.listenToChildChanges(context, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
     });
   }
 

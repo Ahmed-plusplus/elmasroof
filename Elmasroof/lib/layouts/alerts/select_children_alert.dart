@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/custom_widget/radio_group/horizontal_radio_group.dart';
 import 'package:elmasroof/models/child_model.dart';
@@ -55,6 +56,7 @@ Widget _createBody(BuildContext context, List<ChildModel> yourChildren, List<Chi
       const Text('اختر الأطفال الذين تريد ربطهم بالحساب الآخر',
         style: TextStyle(
             fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
+        textAlign: TextAlign.center,
       ),
       const SizedBox(height: 16.0,),
       ValueListenableBuilder<ParentType>(
@@ -69,10 +71,14 @@ Widget _createBody(BuildContext context, List<ChildModel> yourChildren, List<Chi
               if(conflictExist)
                 Column(
                   children: [
-                    Text('هناك أطفال بنفس الاسم في الحسابين، حدد نوع الدمج فى اختيار الأطفال',
-                      style: TextStyle(
-                          fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.red),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('هناك أطفال بنفس الاسم في الحسابين، حدد نوع الدمج فى اختيار الأطفال',
+                        style: TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.red),
+                      ),
                     ),
+                    const SizedBox(height: 8.0,),
                     HorizontalRadioGroup<String>(
                         list: ['أطفالى', 'أطفال الحساب الآخر'],
                         callBack: (String? newValue) {
@@ -129,13 +135,8 @@ Widget _createBody(BuildContext context, List<ChildModel> yourChildren, List<Chi
           onPressed: () {
             adScreen.start(() {
               List<ChildModel> selectedChildrenList = childrenList.where((child) => selectedChildren.contains(child.name)).toList();
-              HiveStorage hiveStorage = HiveStorage();
-              selectedChildrenList.forEach((child) {
-                child.otherParentId = otherParentId;
-                hiveStorage.put(child.name, child);
-              });
-
-              FirebaseHandler.instance.linkParents(SharedManager.getData(key: SharedManager.USER_ID) ?? '', otherParentId, selectedChildrenList);
+              HomeCubit homeCubit = HomeCubit.get(context);
+              homeCubit.updateChildrenList(selectedChildrenList, otherParentId);
 
               Navigator.of(context).pop(true);
 

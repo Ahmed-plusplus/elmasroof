@@ -38,7 +38,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
   void changeChild(int index){
     selectedIndex = index;
-    emit(ChangeChildState());
+    emit(ChangeChildIndexState());
   }
 
   Future<void> addToName(Currency currency, double value) async {
@@ -99,6 +99,22 @@ class HomeCubit extends Cubit<HomeStates> {
   void updateDescriptionOfTransaction(int id, String description){
     db.updateDescription(id, description);
     emit(UpdateDescriptionState());
+  }
+
+  void updateChildrenList(List<ChildModel> selectedChildrenList, String otherParentId) {
+    selectedChildrenList.forEach((child) {
+      child.otherParentId = otherParentId;
+      hiveStorage.put(child.name, child);
+    });
+
+    FirebaseHandler.instance.linkParents(SharedManager.getData(key: SharedManager.USER_ID) ?? '', otherParentId, selectedChildrenList);
+
+    emit(UpdateChildrenListState());
+  }
+
+  void updateChildFromFirebase(ChildModel child) {
+    hiveStorage.put(child.name, child);
+    emit(ChangeChildState());
   }
 
 }

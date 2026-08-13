@@ -6,6 +6,7 @@ import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
 import 'package:elmasroof/layouts/alerts/merge_with_firebase_alert.dart';
 import 'package:elmasroof/layouts/alerts/select_children_alert.dart';
 import 'package:elmasroof/layouts/alerts/success_dialog.dart';
+import 'package:elmasroof/layouts/alerts/unlink_children_alert.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/user_model.dart';
 import 'package:elmasroof/modules/about_screen.dart';
@@ -45,12 +46,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   InterstitialAdScreen interstitialAdScreen = InterstitialAdScreen();
   final HiveStorage _hiveStorage = HiveStorage();
+  late ValueNotifier<(bool, bool)> linkNotifier;
 
   @override
   void initState() {
     super.initState();
 
     _authCubit = AuthCubit.get(context);
+    bool isThereChildLinked = _hiveStorage.getAll()?.any((child) => child.otherParentId != null) ?? false;
+    bool isThereChildUnlinked = _hiveStorage.getAll()?.any((child) => child.otherParentId == null) ?? false;
+    linkNotifier = ValueNotifier((isThereChildLinked, isThereChildUnlinked));
 
     items = [
       _changeRewardsValue(),
@@ -77,6 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           children: [
             Expanded(
+              flex: 2,
               child: ListView.separated(
                 itemCount: items.length,
                 itemBuilder: (context, index) => Padding(
@@ -87,35 +93,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: Container(height: 1, color: Colors.grey,),
                 ),
+                physics: NeverScrollableScrollPhysics(),
               ),
             ),
-            if(clientId.value.isNotEmpty)
-              Expanded(
-                child: SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: PrettyQrView.data(
-                    data: jsonEncode({
-                      'type': 'link_parent_qr',
-                      'app': 'Elmasroof',
-                      'data': clientId.value,
-                    }),
-                    decoration: PrettyQrDecoration(
-                      shape: const PrettyQrSmoothSymbol(
-                        color: Colors.lightBlue,
-                      ),
-                      image: PrettyQrDecorationImage(
-                        image: SvgImageProvider(
-                          ConstAssetImages.expenses.path,
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: clientId,
+                builder: (context, value, child) {
+                  if(value.isEmpty) return SizedBox();
+                  return SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: PrettyQrView.data(
+                      data: jsonEncode({
+                        'type': 'link_parent_qr',
+                        'app': 'Elmasroof',
+                        'data': clientId.value,
+                      }),
+                      decoration: PrettyQrDecoration(
+                        shape: const PrettyQrSmoothSymbol(
+                          color: Colors.lightBlue,
                         ),
+                        image: PrettyQrDecorationImage(
+                          image: SvgImageProvider(
+                            ConstAssetImages.expenses.path,
+                          ),
+                        ),
+                        background: Colors.transparent,
+                        quietZone: PrettyQrQuietZone.zero,
                       ),
-                      background: Colors.transparent,
-                      quietZone: PrettyQrQuietZone.zero,
+                      errorCorrectLevel: QrErrorCorrectLevel.H
                     ),
-                    errorCorrectLevel: QrErrorCorrectLevel.H
-                  ),
-                ),
+                  );
+                }
               ),
+            ),
             Text('Version ${AppDeviceInfo.versionName}'),
             SizedBox(height: 8,),
           ],
@@ -230,9 +242,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if(userCredential.additionalUserInfo?.isNewUser ?? false) {
         // First time sign-in
         showSuccessDialog(context: context, message: 'تم التسجيل بنجاح');
-        _setClientIdValue(userCredential.user?.uid ?? '');
+        await _setClientIdValue(userCredential.user?.uid ?? '');
         // Sync local storage with Firebase
-        FirebaseHandler.instance.addNewUser(
+        await FirebaseHandler.instance.addNewUser(
           UserModel(
             uid: userCredential.user?.uid ?? '',
             parentType: SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0,
@@ -240,7 +252,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: _hiveStorage.getAll() ?? [],
           ),
         );
+        FirebaseHandler.instance.listenToChildChanges(context, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
       } else {
+        await _setClientIdValue(userCredential.user?.uid ?? '');
         // Subsequent sign-in
         showMergeWithFirebaseAlert(
           context: context,
@@ -274,13 +288,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ).then((value) {
                 print('Data synced with Firebase');
+                FirebaseHandler.instance.listenToChildChanges(context, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
               }).catchError((e) => print('Error syncing data with Firebase: $e'));
             })
             .catchError((e) => print('Error removing data from Firebase: $e'));
           },
           adScreen: interstitialAdScreen,
         );
-        _setClientIdValue(userCredential.user?.uid ?? '');
       }
     } else {
       showFailedDialog(context: context, message: 'لم يتم تسجيل الدخول');
@@ -320,7 +334,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _linkApp() => ValueListenableBuilder(
     valueListenable: clientId,
     builder: (context, value, child){
-      return value.isEmpty ? _linkAppWithGmail() : _linkAppWithOtherParent();
+      return value.isEmpty ? _linkAppWithGmail()
+          : ValueListenableBuilder(
+            valueListenable: linkNotifier,
+            builder: (context, value, child) {
+              return (value.$1 && value.$2) ? ListView.separated(
+              itemBuilder: (context, index) => index == 0 ? _linkAppWithOtherParent() : _unlinkAppWithOtherParent(),
+              separatorBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0),
+                child: Container(height: 1, color: Colors.grey,),
+              ),
+              itemCount: 2,
+              shrinkWrap: true,
+            ) : (value.$1) ? _unlinkAppWithOtherParent()
+                  : _linkAppWithOtherParent();
+            }
+          );
     },
   );
 
@@ -335,9 +364,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ),
   );
 
-  void _setClientIdValue(String uid) {
+  Widget _unlinkAppWithOtherParent() => GestureDetector(
+    onTap: () => handleUnlinkParents(),
+    child: Row(
+      children: [
+        Icon(Icons.link_off, color: Colors.grey,),
+        SizedBox(width: 8,),
+        Text('فك الإرتباط بحساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}', style: TextStyle(fontSize: 28),),
+      ],
+    ),
+  );
+
+  Future<void> _setClientIdValue(String uid) async{
     clientId.value = uid;
-    SharedManager.putData(key: SharedManager.USER_ID, value: uid);
+    await SharedManager.putData(key: SharedManager.USER_ID, value: uid);
     print('clientId: $uid');
   }
 
@@ -345,10 +385,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final result = await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (_) => const QRScannerScreen(),
+        builder: (_) => QRScannerScreen(),
       ),
     );
-
     if (result != null) {
       print('Scanned data: $result');
       if(result == 'Invalid QR for app') {
@@ -370,16 +409,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
             // create alert to confirm linking the children to the other parent's account
             showSelectChildrenAlert(
-              context: context,
-              yourChildren: _hiveStorage.getAll()?.where((child) => child.otherParentId == null).toList() ?? [],
-              otherChildren: otherParent.children.where((child) => child.otherParentId == null).toList(),
-              otherParentId: result,
-              adScreen: InterstitialAdScreen(),
-              onDismiss: () =>
-                showSuccessDialog(
-                    context: context,
-                    message: 'تم ربط الأطفال بحساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}'
-                )
+                context: context,
+                yourChildren: _hiveStorage.getAll()?.where((child) => child.otherParentId == null).toList() ?? [],
+                otherChildren: otherParent.children.where((child) => child.otherParentId == null).toList(),
+                otherParentId: result,
+                adScreen: InterstitialAdScreen(),
+                onDismiss: () =>
+                    showSuccessDialog(
+                        context: context,
+                        message: 'تم ربط الأطفال بحساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}',
+                        onDismiss: () => linkNotifier.value = (
+                        _hiveStorage.getAll()?.any((child) => child.otherParentId != null) ?? false,
+                        _hiveStorage.getAll()?.any((child) => child.otherParentId == null) ?? false
+                        )
+                    )
             );
           } else {
             showFailedDialog(context: context, message: 'لم يتم العثور على بيانات الحساب الآخر');
@@ -387,5 +430,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }).catchError((e) => print('Error fetching data from Firebase: $e'));
       }
     }
+  }
+
+  void handleUnlinkParents() {
+    // Unlink all children from the other parent's account
+    showUnlinkChildrenAlert(
+      context: context,
+      children: _hiveStorage.getAll()?.where((child) => child.otherParentId != null).toList() ?? [],
+      adScreen: interstitialAdScreen,
+      onDismiss: () => showSuccessDialog(
+          context: context,
+          message: 'تم فك ربط الأطفال من حساب ${SharedManager.getData(key: SharedManager.PARENT_TYPE) == 1 ? "الأب" : "الأم"}',
+          onDismiss: () => linkNotifier.value = (
+          _hiveStorage.getAll()?.any((child) => child.otherParentId != null) ?? false,
+          _hiveStorage.getAll()?.any((child) => child.otherParentId == null) ?? false
+        )
+      )
+    );
   }
 }

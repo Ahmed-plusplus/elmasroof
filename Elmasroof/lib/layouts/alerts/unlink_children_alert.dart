@@ -42,15 +42,15 @@ Widget _createDialog(BuildContext context, List<ChildModel> children, Interstiti
   ),
 );
 
-Widget _createBody(BuildContext context, List<ChildModel> children, InterstitialAdScreen adScreen, VoidCallback? onDismiss) {
+Widget _createBody(BuildContext context, List<ChildModel> childrenList, InterstitialAdScreen adScreen, VoidCallback? onDismiss) {
   Set<String> selectedChildren = {};
-  Set<ChildModel> childrenList = {};
   return Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      const Text('اختر الأطفال الذين تريد الغاء ارتباطهم بأى حساب آخر',
+      const Text('اختر الأطفال الذين تريد الغاء ارتباطهم بالحساب الآخر',
         style: TextStyle(
             fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
+        textAlign: TextAlign.center,
       ),
       const SizedBox(height: 16.0,),
       Column(
