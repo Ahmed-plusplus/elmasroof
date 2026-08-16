@@ -1,3 +1,4 @@
+import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/modules/settings_screen.dart';
 import 'package:elmasroof/shared/formatter/custom_pattern_formatter.dart';
 import 'package:elmasroof/shared/formatter/formatter.dart';
@@ -205,7 +206,8 @@ AppBar appBarWidget({BuildContext? context}) => AppBar(
   leading: (context == null) ? null: IconButton(
       onPressed: () => Navigator.of(context).push(
         MaterialPageRoute(
-            builder: (BuildContext context) => const SettingsScreen()),
+            builder: (BuildContext context) =>
+                SettingsScreen(homeCubit: HomeCubit.get(context),)),
       ),
       icon: const Icon(Icons.settings),
     ),

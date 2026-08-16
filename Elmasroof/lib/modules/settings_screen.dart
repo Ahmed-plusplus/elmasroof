@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:elmasroof/cubit/auth_cubit/auth_cubit.dart';
+import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/layouts/ads/interstitial_ad_screen.dart';
 import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
 import 'package:elmasroof/layouts/alerts/merge_with_firebase_alert.dart';
@@ -28,7 +29,9 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:svg_image_provider/svg_image_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  SettingsScreen({super.key, required this.homeCubit});
+
+  HomeCubit homeCubit;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -252,7 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: _hiveStorage.getAll() ?? [],
           ),
         );
-        FirebaseHandler.instance.listenToChildChanges(context, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
+        FirebaseHandler.instance.listenToChildChanges(widget.homeCubit, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
       } else {
         await _setClientIdValue(userCredential.user?.uid ?? '');
         // Subsequent sign-in
@@ -260,20 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           context: context,
           onPreviousChoose: () {
             /*get all data from firebase then clear and write it to local storage*/
-            _hiveStorage.removeAll()
-                .then((value) {
-                  FirebaseHandler.instance.getUser(userCredential.user?.uid ?? '')
-                      .then((userModel) {
-                    if (userModel != null) {
-                      userModel.children.forEach((child) => _hiveStorage.put(child.name, child));
-                      showSuccessDialog(context: context, message: 'تم استرداد البيانات السابقة');
-                    } else {
-                      showFailedDialog(context: context, message: 'لم يتم العثور على بيانات سابقة');
-                    }
-                  }).catchError((e) => print('Error fetching data from Firebase: $e'));
-            })
-                .catchError((e) => print('Error clearing local storage: $e'));
-
+            widget.homeCubit.getAllDataFromFirebase(userCredential.user?.uid ?? '');
           },
           onCurrentChoose: () {
             /*clear firebase data then sync local storage with firebase*/
@@ -288,7 +278,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ).then((value) {
                 print('Data synced with Firebase');
-                FirebaseHandler.instance.listenToChildChanges(context, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
+                FirebaseHandler.instance.listenToChildChanges(widget.homeCubit, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
               }).catchError((e) => print('Error syncing data with Firebase: $e'));
             })
             .catchError((e) => print('Error removing data from Firebase: $e'));

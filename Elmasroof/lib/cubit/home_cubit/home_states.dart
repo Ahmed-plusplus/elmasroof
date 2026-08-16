@@ -23,3 +23,9 @@ class ChangeChildCurrencyState extends HomeStates {}
 class UpdateDescriptionState extends HomeStates {}
 class UpdateChildrenListState extends HomeStates {}
 class ChangeChildState extends HomeStates {}
+class OnSuccessGetDateFromFirebaseState extends HomeStates {}
+class OnErrorState extends HomeStates {
+  String message;
+
+  OnErrorState(this.message);
+}

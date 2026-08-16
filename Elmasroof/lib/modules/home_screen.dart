@@ -7,6 +7,7 @@ import 'package:elmasroof/layouts/alerts/add_description_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_currency_alert.dart';
 import 'package:elmasroof/layouts/alerts/choose_sticker_alert.dart';
 import 'package:elmasroof/layouts/alerts/determine_daily_expenses_alert.dart';
+import 'package:elmasroof/layouts/alerts/failed_dialog.dart';
 import 'package:elmasroof/layouts/alerts/punish_child_alert.dart';
 import 'package:elmasroof/layouts/alerts/remove_alert.dart';
 import 'package:elmasroof/layouts/alerts/reward_dialog.dart';
@@ -76,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       _showRewards(rewardList, 0);
       interstitialAdScreen.start();
-      FirebaseHandler.instance.listenToChildChanges(context, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
     });
   }
 
@@ -236,6 +236,10 @@ class _HomeScreenState extends State<HomeScreen> {
         adScreen: interstitialAdScreen,
       );
       await _handleReward(state.childModel, _cubit.childCurrency);
+    } else if(state is OnErrorState) {
+      showFailedDialog(context: context, message: state.message);
+    } else if(state is OnSuccessGetDateFromFirebaseState){
+      showSuccessDialog(context: context, message: 'تم استرداد البيانات السابقة');
     }
   }
 

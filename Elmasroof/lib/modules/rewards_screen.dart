@@ -2,6 +2,7 @@ import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/enums/reward.dart';
 import 'package:elmasroof/shared/formatter/positive_formatter.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
+import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -104,6 +105,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
           TextEditingController controller = controllers[i];
           SharedManager.putData(key: SharedManager.getRewardId(reward), value: double.parse(controller.text));
         }
+        FirebaseHandler.instance.setRewards(SharedManager.getData(key: SharedManager.USER_ID));
         widget.callback(context);
       }
   );

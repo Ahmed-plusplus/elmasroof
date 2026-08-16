@@ -14,6 +14,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
   HomeCubit(this.hiveStorage) : super(HomeInitialState()){
     childrenNames.addAll(hiveStorage.getKeys());
+    FirebaseHandler.instance.listenToChildChanges(this, SharedManager.getData(key: SharedManager.USER_ID) ?? '');
   }
 
   static HomeCubit get(context) => BlocProvider.of(context);
@@ -114,7 +115,38 @@ class HomeCubit extends Cubit<HomeStates> {
 
   void updateChildFromFirebase(ChildModel child) {
     hiveStorage.put(child.name, child);
+    childrenNames.clear();
+    childrenNames.addAll(hiveStorage.getKeys());
     emit(ChangeChildState());
+  }
+
+   void removeChildFromFirebase(String childName) {
+     hiveStorage.remove(childName);
+     db.removeChild(childName);
+     childrenNames.remove(childName);
+     if (selectedIndex >= childrenNames.length && selectedIndex > 0) {
+       selectedIndex--;
+     }
+     emit(RemoveChildState());
+   }
+
+   void getAllDataFromFirebase(String uid){
+    hiveStorage.removeAll()
+      .then((value) {
+        selectedIndex = 0;
+        childrenNames.clear();
+        FirebaseHandler.instance.getUser(uid)
+            .then((userModel) {
+          if (userModel != null) {
+            userModel.children.forEach((child) => hiveStorage.put(child.name, child));
+            childrenNames.addAll(hiveStorage.getKeys());
+            emit(OnSuccessGetDateFromFirebaseState());
+          } else {
+            emit(OnErrorState('لم يتم العثور على بيانات سابقة'));
+          }
+        }).catchError((e) => emit(OnErrorState('تعذر استرداد البيانات')));
+    }).catchError((e) => emit(OnErrorState('تعذر تغيير البيانات الحالية')));
+
   }
 
 }
