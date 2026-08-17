@@ -105,7 +105,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
           TextEditingController controller = controllers[i];
           SharedManager.putData(key: SharedManager.getRewardId(reward), value: double.parse(controller.text));
         }
-        FirebaseHandler.instance.setRewards(SharedManager.getData(key: SharedManager.USER_ID));
+        FirebaseHandler.instance.setRewards(SharedManager.getData(key: SharedManager.USER_ID) ?? '');
         widget.callback(context);
       }
   );

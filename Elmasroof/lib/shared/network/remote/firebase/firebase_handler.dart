@@ -26,6 +26,7 @@ class FirebaseHandler {
           await _root.doc(uid).collection('children')
           .doc(child.name).set(child.toMap())
       );
+      await setRewards(uid);
       return true;
     } catch (e) {
       print('Error adding new user: $e');

@@ -20,7 +20,7 @@ void showFailedDialog({
     barrierLabel: 'failed dialog',
     barrierDismissible: false,
   );
-  Future.delayed(const Duration(seconds: 2,), (){
+  Future.delayed(const Duration(seconds: 3,), (){
     if(context.mounted){
       Navigator.of(context, rootNavigator: true).pop(true);
       if(onDismiss != null) {
