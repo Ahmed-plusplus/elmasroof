@@ -98,6 +98,10 @@ class AboutScreen extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const TextSpan(text: '.\n'),
+                          const TextSpan(text: 'يمكنك تغيير الايقونة الخاصة بالطفل من خلال الضغط مطولاً عليها.'),
+                          const TextSpan(text: '\n'),
+                          const TextSpan(text: 'يمكنك تغيير تفاصيل العملية من خلال الضغط مطولاً على الصف الخاص بها فى سجل المعاملات.'),
                           // const TextSpan(text: 'تطبيق المصروف يهدف إلى إدارة مصروف الأطفال ومساعدة أولياء الأمور على متابعة وتنظيم الإنفاق والادخار لكل طفل.'),
                           // const TextSpan(text: '\n'),
                           // const TextSpan(text: 'يتيح التطبيق تسجيل جميع عمليات الإنفاق والإيداع،'

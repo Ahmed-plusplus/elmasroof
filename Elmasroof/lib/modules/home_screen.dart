@@ -60,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _cubit = HomeCubit.get(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -82,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     interstitialAdScreen.dispose();
     super.dispose();
   }
@@ -488,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _setReward1(ChildModel child, Currency curr, double trans) {
-    //TODO:: else calculate the percentage of ( (decreasing - increasing) / (daily adding * 30) )
+    //TODO:: calculate the percentage of ( (decreasing - increasing) / (daily adding * 30) )
     if(trans < 0){
       double percentage = (-trans) / (child.increment[curr]! * 30);
       if(percentage >= 0.1){

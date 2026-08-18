@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
+import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/user_model.dart';
 import 'package:elmasroof/shared/enums/reward.dart';
@@ -26,6 +27,7 @@ class FirebaseHandler {
       user.children.forEach((child) async =>
           await _root.doc(uid).collection('children')
           .doc(child.name).set(child.toMap())
+          //TODO:: doc(child.name).collection('db').doc(trans.date).set(trans.toMap())
       );
       await setRewards(uid);
       return true;
@@ -52,6 +54,7 @@ class FirebaseHandler {
           lastUpdate: DateTime.parse(data['lastUpdate']),
           children: childrenCollection.docs.map((childDoc) {
             final childData = childDoc.data();
+            //TODO:: childTransactions = childDoc.reference.collection('db').get();
             return ChildModel.fromJson(childData);
           }).toList(),
         );
@@ -231,4 +234,17 @@ class FirebaseHandler {
   }
 
   // TODO:: sync sqflite database with firebase
+  
+  Future<bool> updateTransaction(String uid, String? otherParentId, ChildExpensesChangingModel trans) async {
+    if(uid.isEmpty){
+      return false;
+    }
+    try{
+      // await _root.doc(uid).collection('children').doc(trans.name).set({});
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
 }

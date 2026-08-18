@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
@@ -60,7 +62,12 @@ class HomeCubit extends Cubit<HomeStates> {
             total: (currency, child.expenses[currency] ?? 0),
           ),
           TransactionType.customTransaction,
-        ),
+        ).then((trans){
+          FirebaseHandler.instance.updateTransaction(
+              SharedManager.getData(key: SharedManager.USER_ID) ?? '', child.otherParentId, trans
+          );
+          return trans;
+        }),
         child
       )
     );

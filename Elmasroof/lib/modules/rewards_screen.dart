@@ -25,7 +25,6 @@ class _RewardsScreenState extends State<RewardsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     rewards = List.generate(Reward.values.length, (index) => Reward.values[index]);
     rewards.sort((a, b) => a.id.compareTo(b.id));
