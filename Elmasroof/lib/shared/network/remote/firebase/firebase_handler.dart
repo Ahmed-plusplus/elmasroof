@@ -3,6 +3,7 @@ import 'package:elmasroof/cubit/home_cubit/home_cubit.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/models/user_model.dart';
 import 'package:elmasroof/shared/enums/reward.dart';
+import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 
 class FirebaseHandler {
@@ -90,9 +91,15 @@ class FirebaseHandler {
         await _root.doc(uid).collection('children').doc(child.name).set(child.toMap());
         await _root.doc(otherParentId).collection('children').doc(child.name).set(child.toMap());
         await _root.doc(otherParentId).collection('children').doc(child.name).update({'otherParentId': uid});
-        await _root.doc(otherParentId).update({'lastUpdate': now.toIso8601String(),});
+      }
+      int currentParent = SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0;
+      if(currentParent == 0){
+        await setRewards(otherParentId);
+      } else {
+        await getRewards(uid);
       }
       await _root.doc(uid).update({'lastUpdate': now.toIso8601String(),});
+      await _root.doc(otherParentId).update({'lastUpdate': now.toIso8601String(),});
       return true;
     } catch (e) {
       print('Error linking parents: $e');
@@ -187,9 +194,18 @@ class FirebaseHandler {
       return false;
     }
     try{
-      Reward.values.forEach((reward){
-        _root.doc(uid).collection('rewards').doc(reward.id.toString())
+      int currentParent = SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0;
+      Set<String>? parentIds = HiveStorage().getAll()?.where((child) => child.otherParentId != null)
+          .map((child) => child.otherParentId!).toSet();
+      Reward.values.forEach((reward) async{
+        await _root.doc(uid).collection('rewards').doc(reward.id.toString())
             .set({'value': SharedManager.getData(key: SharedManager.getRewardId(reward)) ?? 0.0});
+        if(currentParent == 0){
+          parentIds?.forEach((id) async =>
+              await _root.doc(id).collection('rewards').doc(reward.id.toString())
+                  .set({'value': SharedManager.getData(key: SharedManager.getRewardId(reward)) ?? 0.0})
+          );
+        }
       });
       return true;
     }catch(e){

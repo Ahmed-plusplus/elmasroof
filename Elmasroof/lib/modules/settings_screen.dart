@@ -19,6 +19,7 @@ import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
 import 'package:elmasroof/shared/app_device_info.dart';
 import 'package:elmasroof/shared/enums/auth_type.dart';
+import 'package:elmasroof/shared/enums/parent_type.dart';
 import 'package:elmasroof/shared/network/local/hive/hive_storage.dart';
 import 'package:elmasroof/shared/network/local/shared_preferences/shared_manager.dart';
 import 'package:elmasroof/shared/network/remote/firebase/firebase_handler.dart';
@@ -140,12 +141,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _changeRewardsValue() => GestureDetector(
-    onTap: () => Navigator.of(context).push(
+    onTap: () => (((SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0) == 0)
+        || (widget.homeCubit.hiveStorage.getAll()?.every((child) => child.otherParentId == null) ?? true))
+        ? Navigator.of(context).push(
       MaterialPageRoute(
           builder: (BuildContext context) =>
               RewardsScreen(callback: (context) => Navigator.of(context).pop())
       ),
-    ),
+    ) : showFailedDialog(context: context, message: 'حساب الأب هو المسؤول عن قيم الجوائز'),
     child: Row(
       children: [
         Icon(Icons.workspace_premium_outlined, color: Colors.grey,),
@@ -393,15 +396,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
         FirebaseHandler.instance.getUser(result)
             .then((otherParent) {
           if (otherParent != null) {
-            if(otherParent.parentType == SharedManager.getData(key: SharedManager.PARENT_TYPE)) {
+            int currentParent = SharedManager.getData(key: SharedManager.PARENT_TYPE) ?? 0;
+            if(otherParent.parentType == currentParent) {
               showFailedDialog(context: context, message: 'لا يمكن ربط الأطفال بحساب من نفس النوع (أب/أم)');
               return;
+            }
+            if(currentParent == 1){
+              Set<String>? pairedChild = _hiveStorage.getAll()?.where((child) => child.otherParentId != null)
+                  .map((child) => child.otherParentId!).toSet();
+              if(pairedChild?.firstOrNull != otherParent.uid){
+                showFailedDialog(context: context, message: 'غير مسموح للأم بالارتباط بأكثر من أب');
+                return;
+              }
             }
             // create alert to confirm linking the children to the other parent's account
             showSelectChildrenAlert(
                 context: context,
                 yourChildren: _hiveStorage.getAll()?.where((child) => child.otherParentId == null).toList() ?? [],
-                otherChildren: otherParent.children.where((child) => child.otherParentId == null).toList(),
+                otherChildren: otherParent.children.where((child) => child.otherParentId == null
+                    && (_hiveStorage.getAll()?.where((child) => child.otherParentId != null)
+                        .every((localChild) => localChild.name != child.name) ?? true)).toList(),
                 otherParentId: result,
                 adScreen: InterstitialAdScreen(),
                 onDismiss: () =>

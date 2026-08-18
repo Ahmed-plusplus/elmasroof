@@ -1,5 +1,6 @@
 import 'package:elmasroof/shared/components/components.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';
+import 'package:elmasroof/shared/enums/currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -84,6 +85,19 @@ class AboutScreen extends StatelessWidget {
                           const TextSpan(text: 'العقوبة لا تراجع فيها وإذا أضفت عقوبة أخرى قبل انتهاء الأولى سيتم اضافة عدد الأيام على العقوبة الأولى.'),
                           const TextSpan(text: '\n'),
                           const TextSpan(text: 'تظهر الشارات ملونة إذا استحق هذه الشارة وعند الضغط عليها مطولاً تظهر اسم الشارة.'),
+                          const TextSpan(text: '\n'),
+                          const TextSpan(text: 'يمكنك استخدام عملات مختلفة من خلال الضغط على العملة '),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.black12,
+                                child: SvgPicture.asset(Currency.pound.icon),
+                              ),
+                            ),
+                          ),
                           // const TextSpan(text: 'تطبيق المصروف يهدف إلى إدارة مصروف الأطفال ومساعدة أولياء الأمور على متابعة وتنظيم الإنفاق والادخار لكل طفل.'),
                           // const TextSpan(text: '\n'),
                           // const TextSpan(text: 'يتيح التطبيق تسجيل جميع عمليات الإنفاق والإيداع،'

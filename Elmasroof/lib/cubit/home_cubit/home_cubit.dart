@@ -28,6 +28,10 @@ class HomeCubit extends Cubit<HomeStates> {
   SqfliteDB db = SqfliteDB();
 
   void addChild(String name, ChildModel value){
+    if(hiveStorage.get(name) != null){
+      emit(OnErrorState('اسم الطفل موجود مسبقاً'));
+      return;
+    }
     hiveStorage.put(name, value);
     childrenNames.add(name);
     selectedIndex = childrenNames.length - 1;
