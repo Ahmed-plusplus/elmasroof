@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:elmasroof/models/child_expenses_changing_model.dart';
 import 'package:elmasroof/models/child_model.dart';
 import 'package:elmasroof/shared/constants/const_asset_images.dart';

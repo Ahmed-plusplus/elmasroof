@@ -240,7 +240,8 @@ class FirebaseHandler {
       return false;
     }
     try{
-      // await _root.doc(uid).collection('children').doc(trans.name).set({});
+      // await _root.doc(uid).collection('children').doc(trans.name)
+      //     .collection('db').doc(trans.dateTime?.timeZoneName ?? '').set(trans.toMap());
       return true;
     }catch(e){
       return false;

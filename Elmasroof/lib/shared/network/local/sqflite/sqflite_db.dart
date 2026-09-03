@@ -102,7 +102,7 @@ class SqfliteDB {
         '${TransactionConstants.TYPE_ATTR} == ${TransactionType.customTransaction.index}',
       [from.millisecondsSinceEpoch, curr.name, name]
     );
-    return result[0]['SUM(${TransactionConstants.AMOUNT_ATTR})'];
+    return result[0]['SUM(${TransactionConstants.AMOUNT_ATTR})'] ?? 0.0;
   }
 
   Future<int> updateDescription(int id, String description) async {
